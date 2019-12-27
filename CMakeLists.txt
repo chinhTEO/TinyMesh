@@ -2,5 +2,6 @@ cmake_minimum_required(VERSION 3.5) # Definitions
 
 set(PROJECT_NAME tymesh) 
 
+add_subdirectory(lib)
 add_subdirectory(dev) 
-#add_subdirectory(main)
+add_subdirectory(test)
