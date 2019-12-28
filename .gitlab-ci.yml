@@ -1,6 +1,6 @@
 job-build:
   tags:
-    - run-ci
+    - utest
   script:
     - mkdir build
     - cd build
