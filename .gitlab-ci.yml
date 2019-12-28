@@ -2,7 +2,6 @@ job-build:
   tags:
     - ci utest
   script:
-    - mkdir build
     - cd build
     - cmake ..
     - make -j
