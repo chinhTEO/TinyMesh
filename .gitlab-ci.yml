@@ -1,0 +1,9 @@
+job-build:
+  tags:
+    - run-ci
+  script:
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make -j
+    - ./dev/dev_utest
