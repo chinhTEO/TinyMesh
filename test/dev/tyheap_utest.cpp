@@ -43,7 +43,7 @@ TEST_F(tyheap_utest, tymesh_init){
     block = block << 2;
     block = block | 1; //busy
 
-    ASSERT_EQ(mem[tyheap_sizeOfHeap() - tyheap_sizeOfHeader()], (block & 0x00ff));
+    ASSERT_EQ(mem[tyheap_sizeOfHeap() - tyheap_sizeOfHeader()],     (block & 0x00ff));
     ASSERT_EQ(mem[tyheap_sizeOfHeap() - tyheap_sizeOfHeader() + 1], block >> 8);
 }
 

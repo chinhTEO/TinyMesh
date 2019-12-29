@@ -2,6 +2,10 @@
 #include <stdint.h>
 #include <string.h>
 
+#ifdef DEBUG
+    #include <stdio.h>
+#endif
+
 //structure [status][nextindex][data  ] 
 //          [ 2bit ][ 14 bit  ][ nbit ]
 
@@ -10,21 +14,28 @@ enum {
     BUSY = 1
 };
 
+enum {
+    SPLIT_OK,
+    SPLIT_OVERSIZE,
+    SPLIT_BUSY,
+    SPLIT_UNCHANGE  
+};
+
 struct Header{
     unsigned char status : 2;
     uint16_t nextIndex : 14;
 };
 
-struct Block{
-    struct Header block;
-    uint16_t size;
-};
-
-#define NUMBER_OF_FREE_SLOT 5
-#define INDEX_BLOCK_PTR(n)   ((struct Header *)&MEMBLOCK[n])
+#define INDEX_OF_PTR(ptr)           ((unsigned char *)ptr - MEMBLOCK)
+#define SIZE_OF_BLOCK_PTR(ptr)      (ptr->nextIndex - INDEX_OF_PTR(ptr))
+#define SIZE_OF_BLOCK_INDEX(index)  (((struct Header *)&MEMBLOCK[index])->nextIndex - index)
+#define NUMBER_OF_FREE_SLOT     5
+#define INDEX_BLOCK_PTR(index)      ((struct Header *)&MEMBLOCK[index])
+#define BLOCK_MEM_PTR_INDEX(index)  ((void *)&MEMBLOCK[index + sizeof(struct Header)])
+#define BLOCK_MEM_PTR_PTR(ptr)      (ptr + sizeof(struct Header))
 
 const uint16_t sizeList[NUMBER_OF_FREE_SLOT] = { 128, 64, 32, 16, 8 }; // free space Guarantee
-struct Block freeBlockList[NUMBER_OF_FREE_SLOT];
+unsigned short freeBlockList[NUMBER_OF_FREE_SLOT];
 
 unsigned char MEMBLOCK[SIZE_OF_HEAP];
 
@@ -45,28 +56,79 @@ void  tyheap_init( void ){
     lastBlock->status = BUSY;
     lastBlock->nextIndex = 0;
 
-    memset(freeBlockList, 0, NUMBER_OF_FREE_SLOT*sizeof(struct Block)); // reset all slot in freeBlockList to 0
+    memset(freeBlockList, 0, NUMBER_OF_FREE_SLOT*sizeof(struct Header*)); // reset all slot in freeBlockList to 0
 }
 
-void *tyheap_malloc( size_t size ){
+unsigned short split_block(unsigned short index, size_t size){
+    struct Header *block = INDEX_BLOCK_PTR(index);
+    struct Header *nblock;
+    unsigned short current_block_size = block->nextIndex - index;
 
+    if(block->status == BUSY){
+        return SPLIT_BUSY;
+    }
+
+    if(current_block_size > size + sizeof(struct Header)*2 + 8){
+        nblock = INDEX_BLOCK_PTR(index + size + sizeof(struct Header));
+        nblock->nextIndex = block->nextIndex;
+        nblock->status = FREE;
+
+        block->nextIndex = index + size + sizeof(struct Header);
+        return SPLIT_OK;
+    }
+    else if (current_block_size > size + sizeof(struct Header)){
+        return SPLIT_UNCHANGE;
+    }else{
+        return SPLIT_OVERSIZE;
+    }
+}
+
+void *tyheap_alloc( size_t size ){
+    unsigned short i;
+    unsigned short status;
+    for(i = NUMBER_OF_FREE_SLOT - 1; i >= 0 ; i--){
+        if(size < sizeList[i]){
+            if(freeBlockList[i] != 0){
+                status = split_block(freeBlockList[i], size);
+                
+                if(status == SPLIT_OK || status == SPLIT_UNCHANGE){
+                    INDEX_BLOCK_PTR(freeBlockList[i])->status = BUSY;
+                    return BLOCK_MEM_PTR_INDEX(freeBlockList[i]);
+                }
+            }
+        }
+    }
     return NULL;
 }
 
 void  tyheap_free( void *ptr ){
-
+    struct Header *block = (struct Header *)(ptr - sizeof(struct Header));
+    block->status = FREE;
 }
 
 void  tyheap_organize(void ){
     struct Header* block = (struct Header*)MEMBLOCK;
-
+    unsigned short i;
     while(1){
         if(block->status == FREE){
+            // combine with next block if next block is free 
             while(MEMBLOCK[block->nextIndex] == FREE){
                 block->nextIndex = INDEX_BLOCK_PTR(block->nextIndex)->nextIndex;
             }
-            // combine with next block if next block is free 
+
             // update cache free block
+            for(i = 0; i < NUMBER_OF_FREE_SLOT ; i++){
+                if(SIZE_OF_BLOCK_PTR(block) > sizeList[i]){
+                    if(freeBlockList[i] != 0){
+                        if(SIZE_OF_BLOCK_INDEX(freeBlockList[i]) >  SIZE_OF_BLOCK_PTR(block)){
+                            freeBlockList[i] = INDEX_OF_PTR(block);
+                        }
+                    }else{
+                            freeBlockList[i] = INDEX_OF_PTR(block);
+                    }
+                    break;
+                }
+            }
         }
 
         if(block->nextIndex != 0){
@@ -76,7 +138,23 @@ void  tyheap_organize(void ){
         }
     }
 }
+#if DEBUG
 
+void tyheap_printmem(unsigned char size) {
+    int i = 0;
+    printf("---------------mem-----------------\n");
+    for(i = 0; i < size; i++){
+        printf("%x",MEMBLOCK[i]);
+        if(i % 16 == 15){
+            printf("\n");
+        }else{
+            printf(" | ");
+        }
+    }
+    printf("---------------mem-----------------\n");
+}
+
+#endif
 
 #ifdef UTEST
 
