@@ -18,6 +18,7 @@ void  tyheap_organize(void );
 
 unsigned char *tyheap_MEMBLOCK(void);
 unsigned int tyheap_sizeOfHeader(void);
+unsigned int tyheap_sizeOfHeap(void);
 
 #endif
 

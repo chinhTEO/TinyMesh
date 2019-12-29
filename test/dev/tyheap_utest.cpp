@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "tyheap.h"
+#include <iostream>
 
 class tyheap_utest: public ::testing::Test {
     protected: 
@@ -21,12 +22,29 @@ TEST_F(tyheap_utest, header_size){
 
 TEST_F(tyheap_utest, tymesh_init){
     //test first block header 
-    ASSERT_EQ(mem[0], 0b00001001);
-    ASSERT_EQ(mem[1], 0b00000000);
+    uint16_t block = 0;
+    block = 2;
+    block = block << 2;
+    block = block | 1;  //busy
+
+    ASSERT_EQ(mem[0], (block & 0x00ff));
+    ASSERT_EQ(mem[1], block >> 8);
 
     //test second block header
-    ASSERT_EQ(mem[2], 0b00000000);
-    ASSERT_EQ(mem[3], 0b00000000);
+    block = 0;
+    block = tyheap_sizeOfHeap() - tyheap_sizeOfHeader();
+    block = block << 2;
+    block = block | 0; //free
+    
+    ASSERT_EQ(mem[2], (block & 0x00ff));
+    ASSERT_EQ(mem[3], block >> 8);
+
+    block = 0;
+    block = block << 2;
+    block = block | 1; //busy
+
+    ASSERT_EQ(mem[tyheap_sizeOfHeap() - tyheap_sizeOfHeader()], (block & 0x00ff));
+    ASSERT_EQ(mem[tyheap_sizeOfHeap() - tyheap_sizeOfHeader() + 1], block >> 8);
 }
 
 
