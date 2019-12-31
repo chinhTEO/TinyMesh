@@ -80,6 +80,8 @@ unsigned short createNewBLockBeginAt(struct Header *block, size_t dataSize);
 struct Header* findAvailableBlockBiggerThan(size_t size);
 
 extern unsigned char MEMBLOCK[SIZE_OF_HEAP];
+extern unsigned char *START_FLASH_SEG; 
+extern unsigned char *END_NORMAL_SEG;
 #endif
 
 #ifdef __cplusplus

@@ -52,7 +52,7 @@ struct Header{
 #endif
 
 unsigned char MEMBLOCK[SIZE_OF_HEAP];
-unsigned char *START_FLASH_SEG = &MEMBLOCK[SIZE_OF_HEAP - sizeof(struct Header) - 1];
+unsigned char *START_FLASH_SEG; 
 unsigned char *END_NORMAL_SEG;
 
 const uint16_t sizeList[NUM_OF_FREE_BLOCK_CACHE] = { 128, 64, 32, 16, 8 }; // free space Guarantee
@@ -61,11 +61,19 @@ unsigned short freeBlockList[NUM_OF_FREE_BLOCK_CACHE];
 void  tyheap_init( void ){
     //[firstblock][secondblock][data]
     // nextindex == 0 // last memory
-    struct Header* firstBlock = (struct Header*)MEMBLOCK;
-    firstBlock->status = END;
-    firstBlock->next = 0;
+    struct Header* block;
 
+    block = (struct Header*)MEMBLOCK;
+    block->status = END;
+    block->next = 0;
     
+    END_NORMAL_SEG   = (unsigned char*)block + 1;
+
+    block = &MEMBLOCK[SIZE_OF_HEAP - sizeof(struct Header)];
+    block->status = END;
+    block->next = 0;
+
+    START_FLASH_SEG = (unsigned char*)block;
 }
 
 struct Header* findAvailableBlockBiggerThan(size_t size){

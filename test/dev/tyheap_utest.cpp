@@ -24,8 +24,18 @@ TEST_F(tyheap_utest, header_size){
 
 TEST_F(tyheap_utest, tyheap_init){
     struct Header *testBlock = (struct Header *)&MEMBLOCK[0];
+
     ASSERT_EQ(testBlock->status, END);
     ASSERT_EQ(testBlock->next, 0);
+
+    ASSERT_EQ(END_NORMAL_SEG, (unsigned char *)&MEMBLOCK[1]);
+
+    testBlock = (struct Header *)&MEMBLOCK[SIZE_OF_HEAP - sizeof(struct Header)];
+
+    ASSERT_EQ(testBlock->status, END);
+    ASSERT_EQ(testBlock->next, 0);
+
+    ASSERT_EQ(START_FLASH_SEG, (unsigned char *)&MEMBLOCK[SIZE_OF_HEAP - sizeof(struct Header)]);
 }
 
 TEST_F(tyheap_utest, DATA_SIZE_OF_){
