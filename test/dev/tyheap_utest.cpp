@@ -1,14 +1,17 @@
 #include <gtest/gtest.h>
 #include "tyheap.h"
+#include "tydebug.h"
 #include <iostream>
 
 class tyheap_utest: public ::testing::Test {
     protected: 
-        virtual void SetUp( ) { 
+        virtual void SetUp( ) {
+            memset(MEMBLOCK, 0, sizeof(unsigned char)*SIZE_OF_HEAP); 
             tyheap_init();
         }
 
-        virtual void TearDown( ) { 
+        virtual void TearDown( ) {
+            memset(MEMBLOCK, 0, sizeof(unsigned char)*SIZE_OF_HEAP); 
             // code here will be called just after the test completes
             // ok to through exceptions from here if need be
         }
@@ -27,6 +30,7 @@ TEST_F(tyheap_utest, tyheap_init){
 
 TEST_F(tyheap_utest, DATA_SIZE_OF_){
     unsigned char memblock[11];
+    memset(memblock, 0, 11);
     struct Header *testBlock = (struct Header *)memblock;
     testBlock->status = FREE;
     testBlock->next = 10;
@@ -39,6 +43,7 @@ TEST_F(tyheap_utest, DATA_SIZE_OF_){
 
 TEST_F(tyheap_utest, DATA_ADDR_OF_){
     unsigned char memblock[11];
+    memset(memblock, 0, 11);
     struct Header *testBlock = (struct Header *)memblock;
     testBlock->status = FREE;
     testBlock->next = 10;
@@ -63,6 +68,7 @@ TEST_F(tyheap_utest, IS_STATUS_){
 
 TEST_F(tyheap_utest, NEXT_BLOCK_OF_){
     unsigned char memblock[20];
+    memset(memblock, 0, 20);
     // create two block next to each other
 
     struct Header *testBlock_1 = (struct Header *)memblock;
@@ -92,4 +98,114 @@ TEST_F(tyheap_utest, SIZE_OF_){
 
 TEST_F(tyheap_utest, END_BLOCK_ADDRESS){
     ASSERT_EQ(END_BLOCK_ADDRESS(), &MEMBLOCK[SIZE_OF_HEAP]);
+}
+
+TEST_F(tyheap_utest, createNewBLockBeginAt_no_overflow){
+    struct Header *block = (struct Header *)MEMBLOCK;
+    unsigned int compareSize = 15;
+    unsigned short status;
+
+    unsigned char memblock[30];
+    memset(memblock, 0, 30);
+    struct Header *testBlock = (struct Header *)memblock;
+    testBlock->status = FREE;
+    testBlock->next = 10;
+
+    testBlock = (struct Header *)&memblock[10];
+    testBlock->status = END;
+    testBlock->next = 0;
+
+    status = createNewBLockBeginAt(block, 8);    
+
+    EXPECT_EQ(status, SUCCESS);
+
+    for (int i = 0; i < compareSize; ++i) {
+        EXPECT_EQ(MEMBLOCK[i], memblock[i]) << " differ at index " << i;
+    }
+}
+
+TEST_F(tyheap_utest, createNewBLockBeginAt_overflow){
+    struct Header *block = (struct Header *)MEMBLOCK;
+    unsigned short status;
+
+    status = createNewBLockBeginAt(block, SIZE_OF_HEAP - sizeof(struct Header)*2 + 1); // this overflow 1 byte 
+
+    EXPECT_EQ(status, FAIL);
+}
+
+TEST_F(tyheap_utest, sliptBlock){
+    const unsigned short testMemSize = 62;
+    struct Header *block;
+    
+    //---------------- test mem ----------------//
+    // prepare virtual memory;
+    unsigned char memblock[testMemSize];
+    memset(memblock, 0, 62);
+    // create 3 block 20 size each
+    block = (struct Header *)&memblock[0];
+    block->status = FREE;
+    block->next   = 20;
+
+    block = (struct Header *)&memblock[20];
+    block->status = FREE;
+    block->next   = 20;
+
+    block = (struct Header *)&memblock[40];
+    block->status = FREE;
+    block->next   = 20;
+
+    block = (struct Header *)&memblock[60];
+    block->status = END;
+    block->next   = 0;
+    //---------------- test mem ----------------//
+
+    //---------------- validation mem ----------------//
+    unsigned char memblock_var[testMemSize];
+    memset(memblock_var, 0, 62);
+    // create 4 block 20->10->10->20
+    block = (struct Header *)&memblock_var[0];
+    block->status = FREE;
+    block->next   = 20;
+
+    block = (struct Header *)&memblock_var[20];
+    block->status = FREE;
+    block->next   = 10;
+
+    block = (struct Header *)&memblock_var[30];
+    block->status = FREE;
+    block->next   = 10;
+
+    block = (struct Header *)&memblock_var[40];
+    block->status = FREE;
+    block->next   = 20;
+
+    block = (struct Header *)&memblock_var[60];
+    block->status = END;
+    block->next   = 0;
+    //---------------- validation mem ----------------//
+
+
+    //----------- success test ----------------//
+
+    //tydebug_printmem(memblock, 62); 
+
+    block = (struct Header *)&memblock[20];
+
+    unsigned short status = splitBlock(block, 8, 5);
+
+    EXPECT_EQ(status, SUCCESS);
+
+    for (int i = 0; i < testMemSize; ++i) {
+        EXPECT_EQ(memblock[i], memblock_var[i]) << " differ at index " << i;
+    }
+
+    //tydebug_printmem(memblock, 62);
+    //tydebug_printmem(memblock_var, 62);
+   
+    // ------------ fail test by overflow --------//
+    block = (struct Header *)&memblock[40];
+
+    status = splitBlock(block, 12, 5);  // overflow by just 1 byte
+
+    EXPECT_EQ(status, FAIL);
 }

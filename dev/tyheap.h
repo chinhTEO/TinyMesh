@@ -20,6 +20,7 @@ extern "C" {
 
 void  tyheap_init( void );
 void *tyheap_alloc( size_t size );
+void *tyheap_flash_alloc( size_t size );
 void  tyheap_free( void *ptr );
 
 void  tyheap_organize(void );
@@ -74,7 +75,7 @@ unsigned char *tyheap_MEMBLOCK(void);
 unsigned int tyheap_sizeOfHeader(void);
 unsigned int tyheap_sizeOfHeap(void);
 
-unsigned short split_block(unsigned short index, size_t size);
+unsigned short splitBlock(struct Header *block, size_t dataSize, unsigned short offset);
 unsigned short createNewBLockBeginAt(struct Header *block, size_t dataSize);
 struct Header* findAvailableBlockBiggerThan(size_t size);
 

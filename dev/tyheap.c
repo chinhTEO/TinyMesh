@@ -52,6 +52,8 @@ struct Header{
 #endif
 
 unsigned char MEMBLOCK[SIZE_OF_HEAP];
+unsigned char *START_FLASH_SEG = &MEMBLOCK[SIZE_OF_HEAP - sizeof(struct Header) - 1];
+unsigned char *END_NORMAL_SEG;
 
 const uint16_t sizeList[NUM_OF_FREE_BLOCK_CACHE] = { 128, 64, 32, 16, 8 }; // free space Guarantee
 unsigned short freeBlockList[NUM_OF_FREE_BLOCK_CACHE];
@@ -62,6 +64,8 @@ void  tyheap_init( void ){
     struct Header* firstBlock = (struct Header*)MEMBLOCK;
     firstBlock->status = END;
     firstBlock->next = 0;
+
+    
 }
 
 struct Header* findAvailableBlockBiggerThan(size_t size){
@@ -87,7 +91,7 @@ struct Header* findAvailableBlockBiggerThan(size_t size){
 
 unsigned short createNewBLockBeginAt(struct Header *block, size_t dataSize){
     //[HEADER][DATA SIZE][HEADER END]
-    if((unsigned char *)block + dataSize + sizeof(struct Header)*2 > END_BLOCK_ADDRESS()){
+    if((unsigned char *)block + dataSize + sizeof(struct Header)*2 < END_BLOCK_ADDRESS()){
         block->status = FREE;
         block->next   = sizeof(struct Header) + dataSize;
 
@@ -100,16 +104,19 @@ unsigned short createNewBLockBeginAt(struct Header *block, size_t dataSize){
     }
 }
 
-unsigned short sliptBlock(struct Header *block, size_t dataSize, unsigned short offset){
+unsigned short splitBlock(struct Header *block, size_t dataSize, unsigned short offset){
     struct Header *nblock;
     
-    if(DATA_SIZE_OF_(block) > sizeof(struct Header) + dataSize + offset) {
-        nblock = block + dataSize + sizeof(struct Header);
+    if(DATA_SIZE_OF_(block) >= sizeof(struct Header) + dataSize + offset) {
+        nblock = (unsigned char *)block + dataSize + sizeof(struct Header);
 
         nblock->next = SIZE_OF_(block) - sizeof(struct Header) - dataSize;
         nblock->status = FREE;
 
         block->next = sizeof(struct Header) + dataSize;
+        return SUCCESS;
+    }else{
+        return FAIL;
     }
 }
 
@@ -119,7 +126,7 @@ void *tyheap_alloc( size_t size ){
 
     if(IS_STATUS_(block, FREE)){
         //SPLIT
-        status = sliptBlock(block, size, OFFSET_SPLIT_SIZE);
+        status = splitBlock(block, size, OFFSET_SPLIT_SIZE);
         return (void *)DATA_ADDR_OF_(block);
         
     }else if(IS_STATUS_(block, END)){
@@ -140,7 +147,7 @@ void  tyheap_organize(void ){
 #if DEBUG
 
 void tyheap_printmem(unsigned int size) {
-    int i = 0;
+    unsigned int i = 0;
     unsigned int address = (unsigned long)(MEMBLOCK);
     unsigned short mask_low;
     unsigned short mask_high;

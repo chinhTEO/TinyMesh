@@ -9,10 +9,12 @@ endif()
 
 SET(headers
     tyheap.h
+    tydebug.h
 )
 
 SET(sources
     tyheap.c 
+    tydebug.c
 )
 
 include_directories(.)
