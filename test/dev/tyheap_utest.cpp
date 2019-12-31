@@ -4,47 +4,92 @@
 
 class tyheap_utest: public ::testing::Test {
     protected: 
-        unsigned char *mem;
         virtual void SetUp( ) { 
             tyheap_init();
-            mem = tyheap_MEMBLOCK();
         }
 
         virtual void TearDown( ) { 
             // code here will be called just after the test completes
             // ok to through exceptions from here if need be
         }
+
 };
 
 TEST_F(tyheap_utest, header_size){
-    ASSERT_EQ(tyheap_sizeOfHeader(),2);
+    ASSERT_EQ(sizeof(struct Header),2);
 }
 
-TEST_F(tyheap_utest, tymesh_init){
-    //test first block header 
-    uint16_t block = 0;
-    block = 2;
-    block = block << 2;
-    block = block | 1;  //busy
+TEST_F(tyheap_utest, tyheap_init){
+    struct Header *testBlock = (struct Header *)&MEMBLOCK[0];
+    ASSERT_EQ(testBlock->status, END);
+    ASSERT_EQ(testBlock->next, 0);
+}
 
-    ASSERT_EQ(mem[0], (block & 0x00ff));
-    ASSERT_EQ(mem[1], block >> 8);
+TEST_F(tyheap_utest, DATA_SIZE_OF_){
+    unsigned char memblock[11];
+    struct Header *testBlock = (struct Header *)memblock;
+    testBlock->status = FREE;
+    testBlock->next = 10;
 
-    //test second block header
-    block = 0;
-    block = tyheap_sizeOfHeap() - tyheap_sizeOfHeader();
-    block = block << 2;
-    block = block | 0; //free
+    //structure [status][nextindex][data  ] 
+    //          [ 2bit ][ 14 bit  ][ nbit ]
+    //  
+    ASSERT_EQ(DATA_SIZE_OF_(testBlock), 10 - sizeof(struct Header));
+}
+
+TEST_F(tyheap_utest, DATA_ADDR_OF_){
+    unsigned char memblock[11];
+    struct Header *testBlock = (struct Header *)memblock;
+    testBlock->status = FREE;
+    testBlock->next = 10;
+
+    //structure [status][nextindex][data  ] 
+    //          [ 2bit ][ 14 bit  ][ nbit ]
+    //          [byte 0][byte 1   ][byte2     ]{pointer addr data here}      
+    int dataPositionInblock = 2;
+    ASSERT_EQ((unsigned char *)DATA_ADDR_OF_(testBlock),&memblock[2]);
+}
+
+TEST_F(tyheap_utest, IS_STATUS_){
+    unsigned char memblock[11];
+    struct Header *testBlock = (struct Header *)memblock;
     
-    ASSERT_EQ(mem[2], (block & 0x00ff));
-    ASSERT_EQ(mem[3], block >> 8);
-
-    block = 0;
-    block = block << 2;
-    block = block | 1; //busy
-
-    ASSERT_EQ(mem[tyheap_sizeOfHeap() - tyheap_sizeOfHeader()],     (block & 0x00ff));
-    ASSERT_EQ(mem[tyheap_sizeOfHeap() - tyheap_sizeOfHeader() + 1], block >> 8);
+    
+    testBlock->status = FREE;
+    testBlock->next = 10;
+    ASSERT_EQ(IS_STATUS_(testBlock, FREE), true);
+    ASSERT_EQ(IS_STATUS_(testBlock, BUSY), false);
 }
 
+TEST_F(tyheap_utest, NEXT_BLOCK_OF_){
+    unsigned char memblock[20];
+    // create two block next to each other
 
+    struct Header *testBlock_1 = (struct Header *)memblock;
+    testBlock_1->status = FREE;
+    testBlock_1->next = 10;
+
+    struct Header *testBlock_2 = (struct Header *)&memblock[10];
+    testBlock_2->status = FREE;
+    testBlock_2->next = 10;
+
+    //structure [status][nextindex][data    ][next block           ] 
+    //          [ 2bit ][ 14 bit  ][ nbit   ]
+    //          [byte 0][byte 1   ][byte2->n][sizeofbeforeblock + 1] <--- {pointer next block here}
+
+    ASSERT_EQ(NEXT_BLOCK_OF_(testBlock_1),testBlock_2);
+}
+
+TEST_F(tyheap_utest, SIZE_OF_){
+    unsigned char memblock[11];
+    struct Header *testBlock = (struct Header *)memblock;
+    
+    
+    testBlock->status = FREE;
+    testBlock->next = 10;
+    ASSERT_EQ(SIZE_OF_(testBlock), 10);
+}
+
+TEST_F(tyheap_utest, END_BLOCK_ADDRESS){
+    ASSERT_EQ(END_BLOCK_ADDRESS(), &MEMBLOCK[SIZE_OF_HEAP]);
+}

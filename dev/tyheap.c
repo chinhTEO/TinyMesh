@@ -1,17 +1,26 @@
 #include "tyheap.h"
+#include <string.h>
+
+#if !UTEST
 #include <stdint.h>
 #include <string.h>
 
-#ifdef DEBUG
+#if DEBUG
     #include <stdio.h>
 #endif
 
-//structure [status][nextindex][data  ] 
-//          [ 2bit ][ 14 bit  ][ nbit ]
 
+//------------------------ expose start --------------------------//
 enum {
     FREE = 0,
-    BUSY = 1
+    BUSY = 1,
+    TEMP = 2,
+    END  = 3,
+};
+
+enum {
+    FAIL,
+    SUCCESS
 };
 
 enum {
@@ -21,142 +30,180 @@ enum {
     SPLIT_UNCHANGE  
 };
 
+
+//structure [status][nextindex][data  ] 
+//          [ 2bit ][ 14 bit  ][ nbit ]
 struct Header{
     unsigned char status : 2;
-    uint16_t nextIndex : 14;
+    uint16_t next: 14;
 };
 
-#define INDEX_OF_PTR(ptr)           ((unsigned char *)ptr - MEMBLOCK)
-#define SIZE_OF_BLOCK_PTR(ptr)      (ptr->nextIndex - INDEX_OF_PTR(ptr))
-#define SIZE_OF_BLOCK_INDEX(index)  (((struct Header *)&MEMBLOCK[index])->nextIndex - index)
-#define NUMBER_OF_FREE_SLOT     5
-#define INDEX_BLOCK_PTR(index)      ((struct Header *)&MEMBLOCK[index])
-#define BLOCK_MEM_PTR_INDEX(index)  ((void *)&MEMBLOCK[index + sizeof(struct Header)])
-#define BLOCK_MEM_PTR_PTR(ptr)      (ptr + sizeof(struct Header))
+#define DATA_SIZE_OF_(ptr)           (((struct Header*)ptr)->next - sizeof(struct Header))
+#define DATA_ADDR_OF_(ptr)           ((unsigned char *)ptr + sizeof(struct Header))
+#define IS_STATUS_(block, _status)   (((struct Header*)block)->status == _status)
+#define NEXT_BLOCK_OF_(ptr)          (struct Header*)((unsigned char *)ptr + ((struct Header*)ptr)->next)
+#define SIZE_OF_(block)              (block->next)   
+#define END_BLOCK_ADDRESS()          (MEMBLOCK + SIZE_OF_HEAP)
 
-const uint16_t sizeList[NUMBER_OF_FREE_SLOT] = { 128, 64, 32, 16, 8 }; // free space Guarantee
-unsigned short freeBlockList[NUMBER_OF_FREE_SLOT];
+#define NUM_OF_FREE_BLOCK_CACHE     5
+#define OFFSET_SPLIT_SIZE           5
+
+//------------------------ expose end --------------------------//
+#endif
 
 unsigned char MEMBLOCK[SIZE_OF_HEAP];
+
+const uint16_t sizeList[NUM_OF_FREE_BLOCK_CACHE] = { 128, 64, 32, 16, 8 }; // free space Guarantee
+unsigned short freeBlockList[NUM_OF_FREE_BLOCK_CACHE];
 
 void  tyheap_init( void ){
     //[firstblock][secondblock][data]
     // nextindex == 0 // last memory
     struct Header* firstBlock = (struct Header*)MEMBLOCK;
-    struct Header* secondBlock;
-    struct Header* lastBlock = INDEX_BLOCK_PTR(SIZE_OF_HEAP - sizeof(struct Header));
-    
-    firstBlock->status = BUSY;             //mark first block as busy
-    firstBlock->nextIndex = 2;          //index to next block
-
-    secondBlock = INDEX_BLOCK_PTR(firstBlock->nextIndex);
-    secondBlock->status = FREE;
-    secondBlock->nextIndex = SIZE_OF_HEAP - sizeof(struct Header); //i dont have next block, i am free
-
-    lastBlock->status = BUSY;
-    lastBlock->nextIndex = 0;
-
-    memset(freeBlockList, 0, NUMBER_OF_FREE_SLOT*sizeof(struct Header*)); // reset all slot in freeBlockList to 0
+    firstBlock->status = END;
+    firstBlock->next = 0;
 }
 
-unsigned short split_block(unsigned short index, size_t size){
-    struct Header *block = INDEX_BLOCK_PTR(index);
-    struct Header *nblock;
-    unsigned short current_block_size = block->nextIndex - index;
+struct Header* findAvailableBlockBiggerThan(size_t size){
+    struct Header* block = (struct Header*)MEMBLOCK;
+    struct Header* addr = NULL;
+    while(1){
+        if(IS_STATUS_(block,FREE)){
+            if(DATA_SIZE_OF_(block) >= size){
+                addr = (struct Header* )DATA_ADDR_OF_(block);
+                break;
+            }
+        }
 
-    if(block->status == BUSY){
-        return SPLIT_BUSY;
+        if(IS_STATUS_(block, END)){
+            addr = (struct Header* )DATA_ADDR_OF_(block);
+            break;
+        }
+        else
+            block = NEXT_BLOCK_OF_(block);
     }
+    return addr;
+}
 
-    if(current_block_size > size + sizeof(struct Header)*2 + 8){
-        nblock = INDEX_BLOCK_PTR(index + size + sizeof(struct Header));
-        nblock->nextIndex = block->nextIndex;
+unsigned short createNewBLockBeginAt(struct Header *block, size_t dataSize){
+    //[HEADER][DATA SIZE][HEADER END]
+    if((unsigned char *)block + dataSize + sizeof(struct Header)*2 > END_BLOCK_ADDRESS()){
+        block->status = FREE;
+        block->next   = sizeof(struct Header) + dataSize;
+
+        block = NEXT_BLOCK_OF_(block);
+        block->status = END; 
+    
+        return SUCCESS;
+    }else{
+        return FAIL;
+    }
+}
+
+unsigned short sliptBlock(struct Header *block, size_t dataSize, unsigned short offset){
+    struct Header *nblock;
+    
+    if(DATA_SIZE_OF_(block) > sizeof(struct Header) + dataSize + offset) {
+        nblock = block + dataSize + sizeof(struct Header);
+
+        nblock->next = SIZE_OF_(block) - sizeof(struct Header) - dataSize;
         nblock->status = FREE;
 
-        block->nextIndex = index + size + sizeof(struct Header);
-        return SPLIT_OK;
-    }
-    else if (current_block_size > size + sizeof(struct Header)){
-        return SPLIT_UNCHANGE;
-    }else{
-        return SPLIT_OVERSIZE;
+        block->next = sizeof(struct Header) + dataSize;
     }
 }
 
 void *tyheap_alloc( size_t size ){
-    unsigned short i;
-    unsigned short status;
-    for(i = NUMBER_OF_FREE_SLOT - 1; i >= 0 ; i--){
-        if(size < sizeList[i]){
-            if(freeBlockList[i] != 0){
-                status = split_block(freeBlockList[i], size);
-                
-                if(status == SPLIT_OK || status == SPLIT_UNCHANGE){
-                    INDEX_BLOCK_PTR(freeBlockList[i])->status = BUSY;
-                    return BLOCK_MEM_PTR_INDEX(freeBlockList[i]);
-                }
-            }
+    struct Header* block = (struct Header*)MEMBLOCK;
+    unsigned short status = FAIL;
+
+    if(IS_STATUS_(block, FREE)){
+        //SPLIT
+        status = sliptBlock(block, size, OFFSET_SPLIT_SIZE);
+        return (void *)DATA_ADDR_OF_(block);
+        
+    }else if(IS_STATUS_(block, END)){
+        status = createNewBLockBeginAt(block, size);
+        if(status == SUCCESS){
+            return (void *)DATA_ADDR_OF_(block);
+        }else{
+            return NULL;
         }
     }
-    return NULL;
 }
 
 void  tyheap_free( void *ptr ){
-    struct Header *block = (struct Header *)(ptr - sizeof(struct Header));
-    block->status = FREE;
 }
 
 void  tyheap_organize(void ){
-    struct Header* block = (struct Header*)MEMBLOCK;
-    unsigned short i;
-    while(1){
-        if(block->status == FREE){
-            // combine with next block if next block is free 
-            while(MEMBLOCK[block->nextIndex] == FREE){
-                block->nextIndex = INDEX_BLOCK_PTR(block->nextIndex)->nextIndex;
-            }
-
-            // update cache free block
-            for(i = 0; i < NUMBER_OF_FREE_SLOT ; i++){
-                if(SIZE_OF_BLOCK_PTR(block) > sizeList[i]){
-                    if(freeBlockList[i] != 0){
-                        if(SIZE_OF_BLOCK_INDEX(freeBlockList[i]) >  SIZE_OF_BLOCK_PTR(block)){
-                            freeBlockList[i] = INDEX_OF_PTR(block);
-                        }
-                    }else{
-                            freeBlockList[i] = INDEX_OF_PTR(block);
-                    }
-                    break;
-                }
-            }
-        }
-
-        if(block->nextIndex != 0){
-            block = (struct Header *)&MEMBLOCK[block->nextIndex];
-        }else{
-            break; // end of memory block
-        }
-    }
 }
 #if DEBUG
 
-void tyheap_printmem(unsigned char size) {
+void tyheap_printmem(unsigned int size) {
     int i = 0;
+    unsigned int address = (unsigned long)(MEMBLOCK);
+    unsigned short mask_low;
+    unsigned short mask_high;
+    unsigned short count = 0;
     printf("---------------mem-----------------\n");
-    for(i = 0; i < size; i++){
-        printf("%x",MEMBLOCK[i]);
+    printf("start : 0x%x\n", address);
+    printf(" \t|");
+    for(i = 0; i < 16; i++){
+        printf("\033[0;33m");
+        printf(" -%x- ",i);
+        printf("\033[0m");
         if(i % 16 == 15){
-            printf("\n");
+            printf("\t|\n");
         }else{
-            printf(" | ");
+            printf("\t| ");
+        }
+    } 
+
+    mask_low = address & 0x0f;
+    mask_high = (address >> 4) & 0x0f;
+
+    printf("\033[0;33m");
+    printf("0x%x",mask_high);
+    printf("\033[0m");
+    printf("\t|");
+    
+    for(i = 0; i < 16; i++){
+        if(mask_low == i){
+            count = i;
+            break;
+        }
+        printf("  ");
+        printf("\t| ");
+        count++;
+    }
+
+    
+    for(i = count; i < size + count; i++){
+        if(MEMBLOCK[i] != 0){
+            printf("\033[1;32m");
+            printf("%x",MEMBLOCK[i]);
+            printf("\033[0m");
+        }else{
+            printf(" ");
+        }
+
+        if(i % 16 == 15){
+            printf("\t|\n");
+            printf("\033[0;33m");
+            printf("0x%x",++mask_high);
+            printf("\033[0m");
+            printf("\t|");
+        }else{
+            printf("\t| ");
         }
     }
-    printf("---------------mem-----------------\n");
+    printf("#END");
+    printf("\n---------------mem-----------------\n");
 }
 
 #endif
 
-#ifdef UTEST
+#if UTEST
 
 unsigned char *tyheap_MEMBLOCK(void){
     return MEMBLOCK;
