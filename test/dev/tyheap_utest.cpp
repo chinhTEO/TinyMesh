@@ -270,3 +270,136 @@ TEST_F(tyheap_utest, findAvailableBlockBiggerThan){
     EXPECT_EQ(status, FAIL);
     EXPECT_EQ(returnBlock, (struct Header *)&memblock[60]);
 }
+
+/**
+ * @brief Construct a new test f object
+ * we test create very first allocation to check
+ */
+TEST_F(tyheap_utest, tyheap_alloc_1){
+    const unsigned short testDataSize = 8;
+
+    //tyheap_printmem(100);
+    unsigned char *allocNem = (unsigned char *)tyheap_alloc(testDataSize);
+    //tyheap_printmem(100);
+    
+
+    EXPECT_EQ(allocNem, &MEMBLOCK[2]); 
+    EXPECT_EQ(END_NORMAL_SEG, allocNem + testDataSize + 1);
+
+    struct Header *block = (struct Header *)(allocNem - 2);
+    
+    EXPECT_EQ(block->status, BUSY);
+    EXPECT_EQ(sizeof(struct Header) + testDataSize , block->next);
+}
+/**
+ * @brief Construct a new test f object
+ * now we alloca mutiple block for testing with what we expect
+ * expand testing
+ */
+TEST_F(tyheap_utest, tyheap_alloc_2){
+    const unsigned short testMemSize = 64;
+    struct Header *block;
+
+    unsigned char memblock[testMemSize];
+    memset(memblock, 0, 62);
+    // create 3 block 20 size each
+    block = (struct Header *)&memblock[0];
+    block->status = BUSY;
+    block->next   = 10;
+
+    block = (struct Header *)&memblock[10];
+    block->status = BUSY;
+    block->next   = 20;
+
+    block = (struct Header *)&memblock[30];
+    block->status = BUSY;
+    block->next   = 30;
+
+    block = (struct Header *)&memblock[60];
+    block->status = END;
+    block->next   = 0;
+
+    unsigned char *allocNem = (unsigned char *)tyheap_alloc(8);
+    
+    allocNem = (unsigned char *)tyheap_alloc(18);
+    allocNem = (unsigned char *)tyheap_alloc(28);
+
+    for (int i = 0; i < testMemSize; ++i) {
+        EXPECT_EQ(MEMBLOCK[i], memblock[i]) << " differ at index " << i;
+    }
+}
+
+/**
+ * @brief Construct a new test f object
+ * test if alloction stop expand when meet START_FLASH_MEMa
+ * 1/ is to check if memory sit nicely
+ */
+TEST_F(tyheap_utest, tyheap_alloc_3){
+    unsigned char *allocMem = (unsigned char *)tyheap_alloc(50);
+    allocMem = (unsigned char *)tyheap_alloc(SIZE_OF_HEAP - sizeof(struct Header)*4 - 50);
+    
+    EXPECT_EQ(END_NORMAL_SEG + 1, START_FLASH_SEG);
+    //tyheap_printmem(100);
+}
+
+/**
+ * @brief Construct a new test f object
+ * test if alloction stop expand when meet START_FLASH_MEMa
+ * 2/ is to check if memory tect overlap
+ * here we will overflow by 1 byte only and it should return NULL
+ */
+TEST_F(tyheap_utest, tyheap_alloc_4){
+    unsigned char *allocMem = (unsigned char *)tyheap_alloc(50);
+    allocMem = (unsigned char *)tyheap_alloc(SIZE_OF_HEAP - sizeof(struct Header)*4 - 50 + 1); // overflow byte 1 byte
+    
+    EXPECT_EQ(allocMem, (unsigned char *)NULL);
+    //tyheap_printmem(100);
+}
+
+
+/**
+ * @brief Construct a new test f object
+ * now we alloca mutiple block and the last block are tembloc 
+ *  
+ */
+TEST_F(tyheap_utest, tyheap_alloc_tmp_1){
+    const unsigned short testMemSize = 64;
+    struct Header *block;
+    unsigned char *allocNem;
+    unsigned char **alloc_ptr;
+
+    unsigned char memblock[testMemSize];
+    memset(memblock, 0, 62);
+    // create 3 block 20 size each
+    block = (struct Header *)&memblock[0];
+    block->status = BUSY;
+    block->next   = 10;
+
+    block = (struct Header *)&memblock[10];
+    block->status = BUSY;
+    block->next   = 20;
+
+    block = (struct Header *)&memblock[30];
+    block->status = TEMP;
+    block->next   = 30;
+
+    alloc_ptr = &allocNem;
+    memcpy((unsigned char *)block + 30 - sizeof(void *), &alloc_ptr, sizeof(void *));
+
+    block = (struct Header *)&memblock[60];
+    block->status = END;
+    block->next   = 0;
+
+    allocNem = (unsigned char *)tyheap_alloc(8);
+    
+    allocNem = (unsigned char *)tyheap_alloc(18);
+    allocNem = (unsigned char *)tyheap_tmp_alloc(28 - sizeof(void *), (void **)&allocNem);
+
+    // tydebug_printmem(memblock, 62);
+    // printf("size of void %ld \n", (unsigned long)sizeof(void *));
+    // tyheap_printmem(100);
+
+    for (int i = 0; i < testMemSize; ++i) {
+        EXPECT_EQ(MEMBLOCK[i], memblock[i]) << " differ at index " << i;
+    }
+}

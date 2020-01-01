@@ -21,6 +21,7 @@ extern "C" {
 void  tyheap_init( void );
 void *tyheap_alloc( size_t size );
 void *tyheap_flash_alloc( size_t size );
+void *tyheap_tmp_alloc(size_t size, void ** ptrAddr);
 void  tyheap_free( void *ptr );
 
 void  tyheap_organize(void );

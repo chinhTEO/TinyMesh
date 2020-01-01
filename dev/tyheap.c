@@ -1,14 +1,10 @@
 #include "tyheap.h"
 #include <string.h>
+#include <stdio.h>
 
 #if !UTEST
 #include <stdint.h>
 #include <string.h>
-
-#if DEBUG
-    #include <stdio.h>
-#endif
-
 
 //------------------------ expose start --------------------------//
 enum {
@@ -148,19 +144,50 @@ unsigned short splitBlock(struct Header *block, size_t dataSize, unsigned short 
 }
 
 void *tyheap_alloc( size_t size ){
-    struct Header* block = (struct Header*)MEMBLOCK;
+    struct Header* block;
     unsigned short status = FAIL;
 
-    if(IS_STATUS_(block, FREE)){
-        //SPLIT
+    status = findAvailableBlockBiggerThan((struct Header*)MEMBLOCK, &block, size);
+
+    if(status == SUCCESS){
         status = splitBlock(block, size, OFFSET_SPLIT_SIZE);
+        block->status = BUSY;
         return (void *)DATA_ADDR_OF_(block);
-        
-    }else if(IS_STATUS_(block, END)){
+    }else{ // fail
         status = expandNormalSeg(block, size);
         if(status == SUCCESS){
+            block->status = BUSY;
             return (void *)DATA_ADDR_OF_(block);
-        }else{
+        }else{ // fail 
+            return NULL;
+        }
+    }
+}
+
+void *tyheap_flash_alloc( size_t size ){
+
+}
+
+//structure [HEADER][DATA][ADDR]
+void *tyheap_tmp_alloc(size_t size, void ** ptrAddr){
+    struct Header* block;
+    unsigned short status = FAIL;
+    unsigned short dataSize = size + sizeof(void *); 
+
+    status = findAvailableBlockBiggerThan((struct Header*)MEMBLOCK, &block, dataSize);
+
+    if(status == SUCCESS){
+        status = splitBlock(block, dataSize, OFFSET_SPLIT_SIZE);
+        block->status = TEMP;
+        memcpy((unsigned char *)block + sizeof(struct Header) + size, &ptrAddr, sizeof(void *));
+        return (void *)DATA_ADDR_OF_(block);
+    }else{ // fail
+        status = expandNormalSeg(block, dataSize);
+        if(status == SUCCESS){
+            block->status = TEMP;
+            memcpy((unsigned char *)block + sizeof(struct Header) + size, &ptrAddr, sizeof(void *));
+            return (void *)DATA_ADDR_OF_(block);
+        }else{ // fail 
             return NULL;
         }
     }
@@ -233,22 +260,6 @@ void tyheap_printmem(unsigned int size) {
     }
     printf("#END");
     printf("\n---------------mem-----------------\n");
-}
-
-#endif
-
-#if UTEST
-
-unsigned char *tyheap_MEMBLOCK(void){
-    return MEMBLOCK;
-}
-
-unsigned int tyheap_sizeOfHeader(void){
-    return sizeof(struct Header);
-}
-
-unsigned int tyheap_sizeOfHeap(void){
-    return SIZE_OF_HEAP;
 }
 
 #endif
