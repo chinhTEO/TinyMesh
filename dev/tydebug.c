@@ -1,4 +1,5 @@
 #include "tydebug.h"
+#include <stdio.h>
 
 void tydebug_printmem(unsigned char *addr, unsigned short size){
     unsigned int i = 0;
@@ -22,7 +23,7 @@ void tydebug_printmem(unsigned char *addr, unsigned short size){
     } 
 
     mask_low = address & 0x0f;
-    mask_high = (address >> 4) & 0x0f;
+    mask_high = (address >> 4) & 0xfff;
 
     printf("\033[0;33m");
     printf("0x%x",mask_high);

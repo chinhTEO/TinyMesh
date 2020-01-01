@@ -69,43 +69,62 @@ void  tyheap_init( void ){
     
     END_NORMAL_SEG   = (unsigned char*)block + 1;
 
-    block = &MEMBLOCK[SIZE_OF_HEAP - sizeof(struct Header)];
+    block = (struct Header*)&MEMBLOCK[SIZE_OF_HEAP - sizeof(struct Header)];
     block->status = END;
     block->next = 0;
 
     START_FLASH_SEG = (unsigned char*)block;
 }
 
-struct Header* findAvailableBlockBiggerThan(size_t size){
-    struct Header* block = (struct Header*)MEMBLOCK;
-    struct Header* addr = NULL;
+unsigned short findAvailableBlockBiggerThan(struct Header *startBlock, struct Header **returnBlock, size_t size){
+    struct Header* block = startBlock;
+    unsigned short status;
     while(1){
-        if(IS_STATUS_(block,FREE)){
+        if(IS_STATUS_(block, FREE)){
             if(DATA_SIZE_OF_(block) >= size){
-                addr = (struct Header* )DATA_ADDR_OF_(block);
+                *returnBlock = block;
+                status = SUCCESS;
                 break;
             }
         }
 
         if(IS_STATUS_(block, END)){
-            addr = (struct Header* )DATA_ADDR_OF_(block);
+            *returnBlock = block;
+            status = FAIL;
             break;
-        }
-        else
+        }else{
             block = NEXT_BLOCK_OF_(block);
+        }
     }
-    return addr;
+    return status;
 }
 
-unsigned short createNewBLockBeginAt(struct Header *block, size_t dataSize){
+unsigned short expandNormalSeg(struct Header *block, size_t dataSize){
     //[HEADER][DATA SIZE][HEADER END]
-    if((unsigned char *)block + dataSize + sizeof(struct Header)*2 < END_BLOCK_ADDRESS()){
+    struct Header *endBlock;
+    
+    if((unsigned char *)block + dataSize + sizeof(struct Header)*2 <= START_FLASH_SEG){
         block->status = FREE;
         block->next   = sizeof(struct Header) + dataSize;
 
-        block = NEXT_BLOCK_OF_(block);
-        block->status = END; 
-    
+        endBlock = NEXT_BLOCK_OF_(block);
+        endBlock->status = END; 
+
+        END_NORMAL_SEG = (unsigned char *)endBlock + 1;
+
+        return SUCCESS;
+    }else{
+        return FAIL;
+    }
+}
+
+unsigned short expandFlashSeg(struct Header **startBlock, size_t dataSize){
+    if(END_NORMAL_SEG + sizeof(struct Header) + dataSize < START_FLASH_SEG){
+        *startBlock = (struct Header *)(START_FLASH_SEG - sizeof(struct Header) - dataSize);
+        (*startBlock)->next = sizeof(struct Header) + dataSize;
+        (*startBlock)->status = FREE;
+        START_FLASH_SEG = (unsigned char *)*startBlock; 
+
         return SUCCESS;
     }else{
         return FAIL;
@@ -116,7 +135,7 @@ unsigned short splitBlock(struct Header *block, size_t dataSize, unsigned short 
     struct Header *nblock;
     
     if(DATA_SIZE_OF_(block) >= sizeof(struct Header) + dataSize + offset) {
-        nblock = (unsigned char *)block + dataSize + sizeof(struct Header);
+        nblock = (struct Header*)((unsigned char *)block + dataSize + sizeof(struct Header));
 
         nblock->next = SIZE_OF_(block) - sizeof(struct Header) - dataSize;
         nblock->status = FREE;
@@ -138,7 +157,7 @@ void *tyheap_alloc( size_t size ){
         return (void *)DATA_ADDR_OF_(block);
         
     }else if(IS_STATUS_(block, END)){
-        status = createNewBLockBeginAt(block, size);
+        status = expandNormalSeg(block, size);
         if(status == SUCCESS){
             return (void *)DATA_ADDR_OF_(block);
         }else{
@@ -158,7 +177,7 @@ void tyheap_printmem(unsigned int size) {
     unsigned int i = 0;
     unsigned int address = (unsigned long)(MEMBLOCK);
     unsigned short mask_low;
-    unsigned short mask_high;
+    unsigned int mask_high;
     unsigned short count = 0;
     printf("---------------mem-----------------\n");
     printf("start : 0x%x\n", address);
@@ -175,7 +194,7 @@ void tyheap_printmem(unsigned int size) {
     } 
 
     mask_low = address & 0x0f;
-    mask_high = (address >> 4) & 0x0f;
+    mask_high = (address >> 4) & 0xfff;
 
     printf("\033[0;33m");
     printf("0x%x",mask_high);

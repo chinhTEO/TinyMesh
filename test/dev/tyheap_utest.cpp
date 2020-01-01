@@ -110,35 +110,42 @@ TEST_F(tyheap_utest, END_BLOCK_ADDRESS){
     ASSERT_EQ(END_BLOCK_ADDRESS(), &MEMBLOCK[SIZE_OF_HEAP]);
 }
 
-TEST_F(tyheap_utest, createNewBLockBeginAt_no_overflow){
+TEST_F(tyheap_utest, expandNormalSeg_no_overflow){
     struct Header *block = (struct Header *)MEMBLOCK;
-    unsigned int compareSize = 15;
     unsigned short status;
 
-    unsigned char memblock[30];
-    memset(memblock, 0, 30);
-    struct Header *testBlock = (struct Header *)memblock;
-    testBlock->status = FREE;
-    testBlock->next = 10;
-
-    testBlock = (struct Header *)&memblock[10];
-    testBlock->status = END;
-    testBlock->next = 0;
-
-    status = createNewBLockBeginAt(block, 8);    
+    status = expandNormalSeg(block, SIZE_OF_HEAP - sizeof(struct Header)*3);    
 
     EXPECT_EQ(status, SUCCESS);
 
-    for (int i = 0; i < compareSize; ++i) {
-        EXPECT_EQ(MEMBLOCK[i], memblock[i]) << " differ at index " << i;
-    }
+    EXPECT_EQ(END_NORMAL_SEG + 1, START_FLASH_SEG);
 }
 
-TEST_F(tyheap_utest, createNewBLockBeginAt_overflow){
+TEST_F(tyheap_utest, expandNormalSeg_overflow){
     struct Header *block = (struct Header *)MEMBLOCK;
     unsigned short status;
 
-    status = createNewBLockBeginAt(block, SIZE_OF_HEAP - sizeof(struct Header)*2 + 1); // this overflow 1 byte 
+    status = expandNormalSeg(block, SIZE_OF_HEAP - sizeof(struct Header)*3 + 1); // this overflow 1 byte 
+
+    EXPECT_EQ(status, FAIL);
+}
+
+TEST_F(tyheap_utest, expandFlashSeg_no_overflow){
+    struct Header *block;
+    unsigned short status;
+
+    status = expandFlashSeg(&block, SIZE_OF_HEAP - sizeof(struct Header)*3);
+
+    EXPECT_EQ(START_FLASH_SEG, (unsigned char *)block);
+    EXPECT_EQ((unsigned char *)NEXT_BLOCK_OF_(block), (unsigned char *)block + SIZE_OF_HEAP - sizeof(struct Header)*3 + sizeof(struct Header));
+    EXPECT_EQ(status, SUCCESS);
+}
+
+TEST_F(tyheap_utest, expandFlashSeg_overflow){
+    struct Header *block;
+    unsigned short status;
+
+    status = expandFlashSeg(&block, SIZE_OF_HEAP - sizeof(struct Header)*3 + 1); // overflow buy 1 byte
 
     EXPECT_EQ(status, FAIL);
 }
@@ -218,4 +225,48 @@ TEST_F(tyheap_utest, sliptBlock){
     status = splitBlock(block, 12, 5);  // overflow by just 1 byte
 
     EXPECT_EQ(status, FAIL);
+}
+
+TEST_F(tyheap_utest, findAvailableBlockBiggerThan){
+    const unsigned short testMemSize = 62;
+    const unsigned short successFindTestSize = 17;
+    const unsigned short failFindTestSize = 30;
+    unsigned short status;
+    struct Header *block;
+    struct Header *returnBlock;
+    
+    //---------------- test mem ----------------//
+    // prepare virtual memory;
+    unsigned char memblock[testMemSize];
+    memset(memblock, 0, 62);
+    // create 3 block 20 size each
+    block = (struct Header *)&memblock[0];
+    block->status = FREE;
+    block->next   = 10;
+
+    block = (struct Header *)&memblock[10];
+    block->status = FREE;
+    block->next   = 20;
+
+    block = (struct Header *)&memblock[30];
+    block->status = FREE;
+    block->next   = 30;
+
+    block = (struct Header *)&memblock[60];
+    block->status = END;
+    block->next   = 0;
+
+    //tydebug_printmem(memblock, 62);
+    //---------------- test mem ----------------//
+    // success test//
+    status = findAvailableBlockBiggerThan((struct Header *)&memblock[0], &returnBlock, successFindTestSize);
+
+    EXPECT_EQ(status, SUCCESS);
+    EXPECT_EQ(returnBlock, (struct Header *)&memblock[10]);
+
+    //fail test//
+    status = findAvailableBlockBiggerThan((struct Header *)&memblock[0], &returnBlock, failFindTestSize);
+
+    EXPECT_EQ(status, FAIL);
+    EXPECT_EQ(returnBlock, (struct Header *)&memblock[60]);
 }

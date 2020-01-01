@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 #ifdef UTEST
-    #define SIZE_OF_HEAP 300
+    #define SIZE_OF_HEAP 100
 #else 
     #define SIZE_OF_HEAP 300
 #endif
@@ -76,8 +76,9 @@ unsigned int tyheap_sizeOfHeader(void);
 unsigned int tyheap_sizeOfHeap(void);
 
 unsigned short splitBlock(struct Header *block, size_t dataSize, unsigned short offset);
-unsigned short createNewBLockBeginAt(struct Header *block, size_t dataSize);
-struct Header* findAvailableBlockBiggerThan(size_t size);
+unsigned short expandNormalSeg(struct Header *endBlock, size_t dataSize);
+unsigned short expandFlashSeg(struct Header **startBlock, size_t dataSize);
+unsigned short findAvailableBlockBiggerThan(struct Header *startBlock, struct Header **returnBlock, size_t size);
 
 extern unsigned char MEMBLOCK[SIZE_OF_HEAP];
 extern unsigned char *START_FLASH_SEG; 
