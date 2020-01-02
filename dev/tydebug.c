@@ -3,10 +3,10 @@
 
 void tydebug_printmem(unsigned char *addr, unsigned short size){
     unsigned int i = 0;
-    unsigned int address = (unsigned long)(addr);
-    unsigned short mask_low;
-    unsigned short mask_high;
-    unsigned short count = 0;
+    unsigned long address = (unsigned long)(addr);
+    unsigned long mask_low;
+    unsigned long mask_high;
+    unsigned int count = 0;
     
     printf("---------------mem-----------------\n");
     printf("start : 0x%x\n", address);
@@ -35,7 +35,9 @@ void tydebug_printmem(unsigned char *addr, unsigned short size){
             count = i;
             break;
         }
-        printf("  ");
+        if(mask_low == i + 1){
+            printf("#STA");
+        }
         printf("\t| ");
         count++;
     }

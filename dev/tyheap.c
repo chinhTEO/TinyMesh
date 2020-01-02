@@ -2,6 +2,10 @@
 #include <string.h>
 #include <stdio.h>
 
+#if DEBUG
+    #include "tydebug.h"
+#endif
+
 #if !UTEST
 #include <stdint.h>
 #include <string.h>
@@ -40,6 +44,7 @@ struct Header{
 #define NEXT_BLOCK_OF_(ptr)          (struct Header*)((unsigned char *)ptr + ((struct Header*)ptr)->next)
 #define SIZE_OF_(block)              (block->next)   
 #define END_BLOCK_ADDRESS()          (MEMBLOCK + SIZE_OF_HEAP)
+#define BLOCK_OF_DATA_ADDR_(ptr)      ((unsigned char*)ptr - sizeof(struct Header))
 
 #define NUM_OF_FREE_BLOCK_CACHE     5
 #define OFFSET_SPLIT_SIZE           5
@@ -143,6 +148,36 @@ unsigned short splitBlock(struct Header *block, size_t dataSize, unsigned short 
     }
 }
 
+unsigned short combineFreeBlock(struct Header *startBlock){
+    struct Header *block = startBlock;
+    struct Header *nblock;
+    unsigned short totalDataSize = 0;
+    if(IS_STATUS_(block, FREE)){
+        totalDataSize = block->next - sizeof(struct Header);
+        while(1){
+            nblock = NEXT_BLOCK_OF_(block);
+            if(IS_STATUS_(nblock, FREE) && (block->next + nblock->next) <= 16384){ // our size limit   
+                block->next = block->next + nblock->next;
+                totalDataSize = block->next - sizeof(struct Header);
+            }else{
+                break;
+            }
+        }
+    }
+    return totalDataSize;
+}
+
+void setPtrOfTempToNULL(struct Header *block){
+    unsigned char *ptrAddr;
+    unsigned char **accAddr;
+    ptrAddr = (unsigned char *)NEXT_BLOCK_OF_(block) - sizeof(unsigned char *);
+    //printf("adrress of next block : 0x%lx \n", *ptrAddr);
+    //tydebug_printmem((unsigned char *)block, block->next);
+    memcpy(accAddr, ptrAddr, sizeof(unsigned char *));
+    //printf("addd : 0x%lx \n", (unsigned long)*accAddr);
+    *((unsigned char**)*accAddr) = (unsigned char *)NULL;
+}
+
 void *tyheap_alloc( size_t size ){
     struct Header* block;
     unsigned short status = FAIL;
@@ -169,23 +204,23 @@ void *tyheap_flash_alloc( size_t size ){
 }
 
 //structure [HEADER][DATA][ADDR]
-void *tyheap_tmp_alloc(size_t size, void ** ptrAddr){
+void *tyheap_tmp_alloc(size_t size, unsigned char ** ptrAddr){
     struct Header* block;
     unsigned short status = FAIL;
-    unsigned short dataSize = size + sizeof(void *); 
+    unsigned short dataSize = size + sizeof(unsigned char *); 
 
     status = findAvailableBlockBiggerThan((struct Header*)MEMBLOCK, &block, dataSize);
 
     if(status == SUCCESS){
         status = splitBlock(block, dataSize, OFFSET_SPLIT_SIZE);
         block->status = TEMP;
-        memcpy((unsigned char *)block + sizeof(struct Header) + size, &ptrAddr, sizeof(void *));
+        memcpy((unsigned char *)block + sizeof(struct Header) + size, &ptrAddr, sizeof(unsigned char *));
         return (void *)DATA_ADDR_OF_(block);
     }else{ // fail
         status = expandNormalSeg(block, dataSize);
         if(status == SUCCESS){
             block->status = TEMP;
-            memcpy((unsigned char *)block + sizeof(struct Header) + size, &ptrAddr, sizeof(void *));
+            memcpy((unsigned char *)block + sizeof(struct Header) + size, &ptrAddr, sizeof(unsigned char *));
             return (void *)DATA_ADDR_OF_(block);
         }else{ // fail 
             return NULL;
@@ -193,7 +228,16 @@ void *tyheap_tmp_alloc(size_t size, void ** ptrAddr){
     }
 }
 
-void  tyheap_free( void *ptr ){
+void tyheap_free( void *ptr ){
+    struct Header *block = BLOCK_OF_DATA_ADDR_(ptr);
+    //we dont use switch because it may have problem with switch statment in Protothreads
+    if(IS_STATUS_(block, BUSY)){
+        block->status = FREE;
+    }else if(IS_STATUS_(block, TEMP)){
+        setPtrOfTempToNULL(block);
+        block->status = FREE;
+    }
+    combineFreeBlock(block);
 }
 
 void  tyheap_organize(void ){
@@ -233,7 +277,9 @@ void tyheap_printmem(unsigned int size) {
             count = i;
             break;
         }
-        printf("  ");
+        if(mask_low == i + 1){
+            printf("#STA");
+        }
         printf("\t| ");
         count++;
     }

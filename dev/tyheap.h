@@ -21,7 +21,7 @@ extern "C" {
 void  tyheap_init( void );
 void *tyheap_alloc( size_t size );
 void *tyheap_flash_alloc( size_t size );
-void *tyheap_tmp_alloc(size_t size, void ** ptrAddr);
+void *tyheap_tmp_alloc(size_t size, unsigned char ** ptrAddr);
 void  tyheap_free( void *ptr );
 
 void  tyheap_organize(void );
@@ -66,6 +66,7 @@ struct Header{
 #define NEXT_BLOCK_OF_(ptr)          (struct Header*)((unsigned char *)ptr + ((struct Header*)ptr)->next)
 #define SIZE_OF_(block)              (block->next)   
 #define END_BLOCK_ADDRESS()          (MEMBLOCK + SIZE_OF_HEAP)
+#define BLOCK_OF_DATA_ADDR_(ptr)      (struct Header*)((unsigned char*)ptr - sizeof(struct Header))
 
 #define NUM_OF_FREE_BLOCK_CACHE     5
 #define OFFSET_SPLIT_SIZE           5
@@ -80,6 +81,8 @@ unsigned short splitBlock(struct Header *block, size_t dataSize, unsigned short 
 unsigned short expandNormalSeg(struct Header *endBlock, size_t dataSize);
 unsigned short expandFlashSeg(struct Header **startBlock, size_t dataSize);
 unsigned short findAvailableBlockBiggerThan(struct Header *startBlock, struct Header **returnBlock, size_t size);
+unsigned short combineFreeBlock(struct Header *startBlock);
+void setPtrOfTempToNULL(struct Header *block);
 
 extern unsigned char MEMBLOCK[SIZE_OF_HEAP];
 extern unsigned char *START_FLASH_SEG; 

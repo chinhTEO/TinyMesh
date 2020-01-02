@@ -110,6 +110,12 @@ TEST_F(tyheap_utest, END_BLOCK_ADDRESS){
     ASSERT_EQ(END_BLOCK_ADDRESS(), &MEMBLOCK[SIZE_OF_HEAP]);
 }
 
+TEST_F(tyheap_utest, BLOCK_OF_DATA_ADDR_){
+    unsigned char memTest[10];
+    struct Header *block = BLOCK_OF_DATA_ADDR_(&memTest[8]);
+    EXPECT_EQ((unsigned char *)block, &memTest[8] - sizeof(Header));
+}
+
 TEST_F(tyheap_utest, expandNormalSeg_no_overflow){
     struct Header *block = (struct Header *)MEMBLOCK;
     unsigned short status;
@@ -226,6 +232,129 @@ TEST_F(tyheap_utest, sliptBlock){
 
     EXPECT_EQ(status, FAIL);
 }
+/**
+ * @brief Construct a new test f object
+ * we create 2 block free -> TEMP -> 2 block free -> BUSY -> 2 block free -> end
+ * return should be 3 block free only
+ */
+TEST_F(tyheap_utest, combineFreeBlock_no_overflow){
+        const unsigned short testMemSize = 194;
+    struct Header *block;
+    unsigned char *allocNem;
+    unsigned char **alloc_ptr;
+    unsigned short freeSize = 0;
+
+    unsigned char memblock[testMemSize];
+    memset(memblock, 0, testMemSize);
+    // create 3 block 20 size each
+    block = (struct Header *)&memblock[0];
+    block->status = FREE;
+    block->next   = 10;
+
+    block = (struct Header *)&memblock[10];
+    block->status = FREE;
+    block->next   = 20;
+
+    block = (struct Header *)&memblock[30];
+    block->status = TEMP;
+    block->next   = 30;
+
+    alloc_ptr = &allocNem;
+    memcpy((unsigned char *)block + 30 - sizeof(void *), &alloc_ptr, sizeof(void *));
+
+    block = (struct Header *)&memblock[60];
+    block->status = FREE;
+    block->next   = 20;
+
+
+    block = (struct Header *)&memblock[80];
+    block->status = FREE;
+    block->next   = 20;
+
+    block = (struct Header *)&memblock[100];
+    block->status = BUSY;
+    block->next   = 20;
+
+    block = (struct Header *)&memblock[120];
+    block->status = FREE;
+    block->next   = 30;
+
+
+    block = (struct Header *)&memblock[150];
+    block->status = FREE;
+    block->next   = 20;
+
+    block = (struct Header *)&memblock[170];
+    block->status = FREE;
+    block->next   = 20;
+
+    block = (struct Header *)&memblock[190];
+    block->status = END;
+    block->next   = 0;
+
+    block = (struct Header *)&memblock[0];
+    freeSize = combineFreeBlock(block);
+
+    EXPECT_EQ(freeSize, 10 + 20 - sizeof(struct Header));
+    EXPECT_EQ(block->next, 30);
+    EXPECT_EQ(block->status, FREE);
+
+    block = (struct Header *)&memblock[60];
+    freeSize = combineFreeBlock(block);
+    EXPECT_EQ(freeSize, 20 + 20 - sizeof(struct Header));
+    EXPECT_EQ(block->next, 40);
+    EXPECT_EQ(block->status, FREE);
+
+    block = (struct Header *)&memblock[120];
+    freeSize = combineFreeBlock(block);
+    EXPECT_EQ(freeSize, 30 + 20 + 20 - sizeof(struct Header));
+    EXPECT_EQ(block->next, 70);
+    EXPECT_EQ(block->status, FREE);
+}
+
+/**
+ * @brief Construct a new test f object
+ * we create 2 block free -> TEMP -> 2 block free -> BUSY -> 2 block free -> end
+ * return should be 3 block free only
+ */
+TEST_F(tyheap_utest, combineFreeBlock_overflow_16384){
+    const unsigned int testMemSize = 20000;
+    struct Header *block;
+    unsigned char *allocNem;
+    unsigned char **alloc_ptr;
+    unsigned short freeSize = 0;
+
+    unsigned char memblock[testMemSize];
+    memset(memblock, 0, testMemSize);
+    // create 3 block 20 size each
+    block = (struct Header *)&memblock[0];
+    block->status = FREE;
+    block->next   = 10;
+
+    block = (struct Header *)&memblock[10];
+    block->status = FREE;
+    block->next   = 3000 - 10;
+
+    block = (struct Header *)&memblock[3000];
+    block->status = FREE;
+    block->next   = 16384 + 1 - 3000;
+
+    block = (struct Header *)&memblock[16384 + 1];
+    block->status = FREE;
+    block->next   = (20000 -  sizeof(struct Header) + 1) - (16384 + 1);
+
+    block = (struct Header *)&memblock[20000 -  sizeof(struct Header) + 1];
+    block->status = END;
+    block->next   = 0;
+
+    block = (struct Header *)&memblock[0];
+    freeSize = combineFreeBlock(block);
+
+    EXPECT_EQ(freeSize, 3000 - sizeof(struct Header));
+    EXPECT_EQ(block->next, 3000);
+    EXPECT_EQ(block->status, FREE);
+}
+
 
 TEST_F(tyheap_utest, findAvailableBlockBiggerThan){
     const unsigned short testMemSize = 62;
@@ -269,6 +398,39 @@ TEST_F(tyheap_utest, findAvailableBlockBiggerThan){
 
     EXPECT_EQ(status, FAIL);
     EXPECT_EQ(returnBlock, (struct Header *)&memblock[60]);
+}
+
+TEST_F(tyheap_utest, setPtrOfTempToNULL){
+    const unsigned short testMemSize = 24;
+    struct Header *block;
+    unsigned char *allocNem;
+    unsigned char **alloc_ptr;
+
+    unsigned char memblock[testMemSize];
+    memset(memblock, 0, testMemSize);
+    // create 1 block 20 size
+    block = (struct Header *)&memblock[0];
+    block->status = TEMP;
+    block->next   = 20;
+    alloc_ptr = &allocNem;
+    memcpy((unsigned char *)block + 20 - sizeof(void *), &alloc_ptr, sizeof(void *));
+    allocNem = DATA_ADDR_OF_(block);
+
+    block = (struct Header *)&memblock[20];
+    block->status = END;
+    block->next   = 0;
+
+    // prevaluation
+    EXPECT_NE(allocNem, (unsigned char *)NULL);
+    EXPECT_EQ(alloc_ptr, &allocNem);
+    //printf("addr of allocm : 0x%lx \n", (unsigned long)alloc_ptr);
+
+    //action
+    block = (struct Header *)&memblock[0];
+    setPtrOfTempToNULL(block);
+
+    // valuation
+    EXPECT_EQ(allocNem, (unsigned char *)NULL);
 }
 
 /**
@@ -359,17 +521,17 @@ TEST_F(tyheap_utest, tyheap_alloc_4){
 
 /**
  * @brief Construct a new test f object
- * now we alloca mutiple block and the last block are tembloc 
+ * now we alloca mutiple block and the last block are busy
  *  
  */
 TEST_F(tyheap_utest, tyheap_alloc_tmp_1){
-    const unsigned short testMemSize = 64;
+    const unsigned short testMemSize = 84;
     struct Header *block;
     unsigned char *allocNem;
     unsigned char **alloc_ptr;
 
     unsigned char memblock[testMemSize];
-    memset(memblock, 0, 62);
+    memset(memblock, 0, testMemSize);
     // create 3 block 20 size each
     block = (struct Header *)&memblock[0];
     block->status = BUSY;
@@ -387,19 +549,103 @@ TEST_F(tyheap_utest, tyheap_alloc_tmp_1){
     memcpy((unsigned char *)block + 30 - sizeof(void *), &alloc_ptr, sizeof(void *));
 
     block = (struct Header *)&memblock[60];
+    block->status = BUSY;
+    block->next   = 20;
+
+    block = (struct Header *)&memblock[80];
     block->status = END;
     block->next   = 0;
 
     allocNem = (unsigned char *)tyheap_alloc(8);
     
     allocNem = (unsigned char *)tyheap_alloc(18);
-    allocNem = (unsigned char *)tyheap_tmp_alloc(28 - sizeof(void *), (void **)&allocNem);
+    allocNem = (unsigned char *)tyheap_tmp_alloc(28 - sizeof(void *), (unsigned char **)&allocNem);
+    allocNem = (unsigned char *)tyheap_alloc(18);
 
-    // tydebug_printmem(memblock, 62);
+
+    // tydebug_printmem(memblock, testMemSize);
     // printf("size of void %ld \n", (unsigned long)sizeof(void *));
     // tyheap_printmem(100);
 
+    EXPECT_EQ(allocNem, &MEMBLOCK[62]);
     for (int i = 0; i < testMemSize; ++i) {
         EXPECT_EQ(MEMBLOCK[i], memblock[i]) << " differ at index " << i;
     }
+}
+
+/**
+ * @brief Construct a new test f object
+ * now we alloca mutiple temp block and the last block are temp block
+ *  
+ */
+TEST_F(tyheap_utest, tyheap_alloc_tmp_2){
+    const unsigned short testMemSize = 84;
+    struct Header *block;
+    unsigned char *allocNem;
+    unsigned char **alloc_ptr;
+
+    unsigned char memblock[testMemSize];
+    memset(memblock, 0, testMemSize);
+    // create 3 block 20 size each
+    block = (struct Header *)&memblock[0];
+    block->status = BUSY;
+    block->next   = 10;
+
+    block = (struct Header *)&memblock[10];
+    block->status = BUSY;
+    block->next   = 20;
+
+    block = (struct Header *)&memblock[30];
+    block->status = TEMP;
+    block->next   = 30;
+
+    alloc_ptr = &allocNem;
+    memcpy((unsigned char *)block + 30 - sizeof(void *), &alloc_ptr, sizeof(void *));
+
+    block = (struct Header *)&memblock[60];
+    block->status = TEMP;
+    block->next   = 20;
+    alloc_ptr = &allocNem;
+    memcpy((unsigned char *)block + 20 - sizeof(void *), &alloc_ptr, sizeof(void *));
+
+    block = (struct Header *)&memblock[80];
+    block->status = END;
+    block->next   = 0;
+
+    allocNem = (unsigned char *)tyheap_alloc(8);
+    
+    allocNem = (unsigned char *)tyheap_alloc(18);
+    allocNem = (unsigned char *)tyheap_tmp_alloc(28 - sizeof(void *), (unsigned char **)&allocNem);
+    allocNem = (unsigned char *)tyheap_tmp_alloc(18 - sizeof(void *), (unsigned char **)&allocNem);
+
+    // tydebug_printmem(memblock, testMemSize);
+    // printf("size of void %ld \n", (unsigned long)sizeof(void *));
+    // tyheap_printmem(100);
+
+    EXPECT_EQ(allocNem, &MEMBLOCK[62]);
+    for (int i = 0; i < testMemSize; ++i) {
+        EXPECT_EQ(MEMBLOCK[i], memblock[i]) << " differ at index " << i;
+    }
+}
+
+
+/**
+ * @brief Construct a new test f object
+ * now we create a memory -> detete busy first
+ *  
+ */
+TEST_F(tyheap_utest, tyheap_delete_alloc){
+    unsigned char *allocNem_1 = (unsigned char *)tyheap_alloc(8);
+    
+    unsigned char *allocNem_2 = (unsigned char *)tyheap_alloc(18);
+    unsigned char *allocNem_3 = (unsigned char *)tyheap_tmp_alloc(28 - sizeof(void *), (unsigned char **)&allocNem_3);
+    unsigned char *allocNem_4 = (unsigned char *)tyheap_tmp_alloc(18 - sizeof(void *), (unsigned char **)&allocNem_4);
+
+    //auto set null when delete
+    EXPECT_NE(allocNem_3, (unsigned char *)NULL);
+    tyheap_free(allocNem_3);
+    EXPECT_EQ(allocNem_3, (unsigned char *)NULL);
+    EXPECT_NE(allocNem_4, (unsigned char *)NULL);
+    tyheap_free(allocNem_4);
+    EXPECT_EQ(allocNem_4, (unsigned char *)NULL);
 }
