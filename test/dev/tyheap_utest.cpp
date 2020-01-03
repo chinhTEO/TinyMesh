@@ -628,6 +628,11 @@ TEST_F(tyheap_utest, tyheap_alloc_tmp_2){
     }
 }
 
+/**
+ * @brief Construct a new test f object
+ * we create an expected memory layout then do allocation to compare
+ * 
+ */
 TEST_F(tyheap_utest, tyheap_alloc_flash_1){
     const unsigned short testMemSize = 64;
     struct Header *block;
@@ -675,6 +680,8 @@ TEST_F(tyheap_utest, tyheap_delete_alloc){
     unsigned char *allocNem_3 = (unsigned char *)tyheap_tmp_alloc(28 - sizeof(void *), (unsigned char **)&allocNem_3);
     unsigned char *allocNem_4 = (unsigned char *)tyheap_tmp_alloc(18 - sizeof(void *), (unsigned char **)&allocNem_4);
 
+    unsigned char *allocNem_5 = (unsigned char *)tyheap_flash_alloc(10);
+
     //auto set null when delete
     EXPECT_NE(allocNem_3, (unsigned char *)NULL);
     tyheap_free(allocNem_3);
@@ -686,8 +693,15 @@ TEST_F(tyheap_utest, tyheap_delete_alloc){
     tyheap_free(allocNem_2);
     tyheap_free(allocNem_1);    
     
+    struct Header *block = BLOCK_OF_DATA_ADDR_(allocNem_5);
+    unsigned short lastNext = block->next; 
+    EXPECT_EQ(block->status, BUSY);
+    tyheap_free(allocNem_5);
+    EXPECT_EQ(block->status, FREE);
+    EXPECT_EQ(block->next, lastNext);
+
     //print mem
-    struct Header *block = (struct Header *)MEMBLOCK;
+    block = (struct Header *)MEMBLOCK;
     EXPECT_EQ(block->next, 80);
     EXPECT_EQ(block->status, FREE);
 }
