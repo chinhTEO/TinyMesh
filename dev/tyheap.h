@@ -60,13 +60,15 @@ struct Header{
     uint16_t next: 14;
 };
 
-#define DATA_SIZE_OF_(ptr)           (((struct Header*)ptr)->next - sizeof(struct Header))
-#define DATA_ADDR_OF_(ptr)           ((unsigned char *)ptr + sizeof(struct Header))
-#define IS_STATUS_(block, _status)   (((struct Header*)block)->status == _status)
-#define NEXT_BLOCK_OF_(ptr)          (struct Header*)((unsigned char *)ptr + ((struct Header*)ptr)->next)
-#define SIZE_OF_(block)              (block->next)   
-#define END_BLOCK_ADDRESS()          (MEMBLOCK + SIZE_OF_HEAP)
-#define BLOCK_OF_DATA_ADDR_(ptr)      (struct Header*)((unsigned char*)ptr - sizeof(struct Header))
+#define DATA_SIZE_OF_(ptr)              (((struct Header*)ptr)->next - sizeof(struct Header))
+#define DATA_ADDR_OF_(ptr)              ((unsigned char *)ptr + sizeof(struct Header))
+#define IS_STATUS_(block, _status)      (((struct Header*)block)->status == _status)
+#define NEXT_BLOCK_OF_(ptr)             (struct Header*)((unsigned char *)ptr + ((struct Header*)ptr)->next)
+#define SIZE_OF_(block)                 (block->next)   
+#define END_BLOCK_ADDRESS()             (MEMBLOCK + SIZE_OF_HEAP)
+#define BLOCK_OF_DATA_ADDR_(ptr)        (struct Header*)((unsigned char*)ptr - sizeof(struct Header))
+#define IS_START_FLASH_SEG_THIS_(block) ((unsigned char *)block == START_FLASH_SEG)
+#define IS_BEFORE_END_BLOCK_THIS_(block) ((unsigned char *)block + ((struct Header*)block)->next + 1 == END_NORMAL_SEG)
 
 #define NUM_OF_FREE_BLOCK_CACHE     5
 #define OFFSET_SPLIT_SIZE           5

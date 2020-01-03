@@ -116,6 +116,22 @@ TEST_F(tyheap_utest, BLOCK_OF_DATA_ADDR_){
     EXPECT_EQ((unsigned char *)block, &memTest[8] - sizeof(Header));
 }
 
+TEST_F(tyheap_utest, IS_START_FLASH_SEG_THIS_){
+    unsigned char *allocNem_5 = (unsigned char *)tyheap_flash_alloc(5);
+    unsigned char *allocNem_6 = (unsigned char *)tyheap_flash_alloc(7);
+
+    EXPECT_EQ(IS_START_FLASH_SEG_THIS_(BLOCK_OF_DATA_ADDR_(allocNem_5)), false);
+    EXPECT_EQ(IS_START_FLASH_SEG_THIS_(BLOCK_OF_DATA_ADDR_(allocNem_6)), true);
+}
+
+TEST_F(tyheap_utest, IS_BEFORE_END_BLOCK_THIS_){
+    unsigned char *allocNem_2 = (unsigned char *)tyheap_alloc(18);
+    unsigned char *allocNem_3 = (unsigned char *)tyheap_tmp_alloc(28 - sizeof(void *), (unsigned char **)&allocNem_3);
+
+    EXPECT_EQ(IS_BEFORE_END_BLOCK_THIS_(BLOCK_OF_DATA_ADDR_(allocNem_2)), false);
+    EXPECT_EQ(IS_BEFORE_END_BLOCK_THIS_(BLOCK_OF_DATA_ADDR_(allocNem_3)), true);
+}
+
 TEST_F(tyheap_utest, expandNormalSeg_no_overflow){
     struct Header *block = (struct Header *)MEMBLOCK;
     unsigned short status;
@@ -680,7 +696,7 @@ TEST_F(tyheap_utest, tyheap_delete_alloc){
     unsigned char *allocNem_3 = (unsigned char *)tyheap_tmp_alloc(28 - sizeof(void *), (unsigned char **)&allocNem_3);
     unsigned char *allocNem_4 = (unsigned char *)tyheap_tmp_alloc(18 - sizeof(void *), (unsigned char **)&allocNem_4);
 
-    unsigned char *allocNem_5 = (unsigned char *)tyheap_flash_alloc(10);
+    unsigned char *allocNem_5 = (unsigned char *)tyheap_flash_alloc(5);
 
     //auto set null when delete
     EXPECT_NE(allocNem_3, (unsigned char *)NULL);
@@ -700,9 +716,18 @@ TEST_F(tyheap_utest, tyheap_delete_alloc){
     EXPECT_EQ(block->status, FREE);
     EXPECT_EQ(block->next, lastNext);
 
+    unsigned char *allocNem_6 = (unsigned char *)tyheap_flash_alloc(7);
+    EXPECT_NE(allocNem_6, (unsigned char *)NULL);
+    tyheap_free(allocNem_6);
+    EXPECT_EQ((unsigned char*)allocNem_6 + 7, START_FLASH_SEG); // free and delete block
+    block = (struct Header *)START_FLASH_SEG;
+    //tyheap_printmem(100);
+    EXPECT_EQ(block->status, END);
+
     //print mem
     block = (struct Header *)MEMBLOCK;
-    EXPECT_EQ(block->next, 80);
-    EXPECT_EQ(block->status, FREE);
+    EXPECT_EQ(block->next, 0);
+    EXPECT_EQ(block->status, END);
 }
+
 
