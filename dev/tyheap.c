@@ -81,31 +81,19 @@ void  tyheap_init( void ){
 
 unsigned short findAvailableBlockBiggerThan(struct Header *startBlock, struct Header **returnBlock, size_t size){
     struct Header* block = startBlock;
-    unsigned short status;
-    while(1){
+    unsigned short status = FAIL;
+    while(!IS_STATUS_(block, END)){
         if(IS_STATUS_(block, FREE)){
+            combineFreeBlock(block);
             if(DATA_SIZE_OF_(block) >= size){
-                *returnBlock = block;
                 status = SUCCESS;
                 break;
-            }else{ // try to compine with next free block
-                combineFreeBlock(block);
-                if(DATA_SIZE_OF_(block) >= size){
-                    *returnBlock = block;
-                    status = SUCCESS;
-                    break;
-                }
             }
+           
         }
-
-        if(IS_STATUS_(block, END)){
-            *returnBlock = block;
-            status = FAIL;
-            break;
-        }else{
-            block = NEXT_BLOCK_OF_(block);
-        }
+        block = NEXT_BLOCK_OF_(block);
     }
+    *returnBlock = block;
     return status;
 }
 
