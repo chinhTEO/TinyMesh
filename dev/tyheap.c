@@ -88,6 +88,13 @@ unsigned short findAvailableBlockBiggerThan(struct Header *startBlock, struct He
                 *returnBlock = block;
                 status = SUCCESS;
                 break;
+            }else{ // try to compine with next free block
+                combineFreeBlock(block);
+                if(DATA_SIZE_OF_(block) >= size){
+                    *returnBlock = block;
+                    status = SUCCESS;
+                    break;
+                }
             }
         }
 
@@ -180,6 +187,13 @@ void setPtrOfTempToNULL(struct Header *block){
     *((unsigned char**)*accAddr) = (unsigned char *)NULL;
 }
 
+void clearAllTempMemory(){
+    struct Header *block = (struct Header *)MEMBLOCK;
+    while(!IS_STATUS_(block, END)){
+
+    }
+}
+
 void *tyheap_alloc( size_t size ){
     struct Header* block;
     unsigned short status = FAIL;
@@ -256,6 +270,7 @@ void tyheap_free( void *ptr ){
         setPtrOfTempToNULL(block);
         block->status = FREE;
     }
+
     combineFreeBlock(block);
 
     if(IS_START_FLASH_SEG_THIS_(block)){
@@ -267,8 +282,30 @@ void tyheap_free( void *ptr ){
     }
 }
 
-void  tyheap_organize(void ){
+void tyheap_organize(void ){
+    struct Header *block = (struct Header *)MEMBLOCK;
+    while(!IS_STATUS_(block, END)){
+        if(IS_STATUS_(block, FREE)){
+            combineFreeBlock(block);
+            if(IS_BEFORE_END_BLOCK_THIS_(block)){
+                block->status = END;
+                block->next   = 0;
+                END_NORMAL_SEG = (unsigned char *)block + 1;
+                break; //end loop , we are done
+            }
+        }
+        block = NEXT_BLOCK_OF_(block);
+    }
+
+    block = (struct Header *)START_FLASH_SEG;
+    while(!IS_STATUS_(block, END)){
+        if(IS_STATUS_(block, FREE)){
+            combineFreeBlock(block);
+        }
+        block = NEXT_BLOCK_OF_(block);
+    }
 }
+
 #if DEBUG
 
 void tyheap_printmem(unsigned int size) {

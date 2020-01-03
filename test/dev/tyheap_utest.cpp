@@ -375,7 +375,7 @@ TEST_F(tyheap_utest, combineFreeBlock_overflow_16384){
 TEST_F(tyheap_utest, findAvailableBlockBiggerThan){
     const unsigned short testMemSize = 62;
     const unsigned short successFindTestSize = 17;
-    const unsigned short failFindTestSize = 30;
+    const unsigned short failFindTestSize = 80;
     unsigned short status;
     struct Header *block;
     struct Header *returnBlock;
@@ -406,8 +406,10 @@ TEST_F(tyheap_utest, findAvailableBlockBiggerThan){
     // success test//
     status = findAvailableBlockBiggerThan((struct Header *)&memblock[0], &returnBlock, successFindTestSize);
 
+    //tydebug_printmem(memblock, 62);
+
     EXPECT_EQ(status, SUCCESS);
-    EXPECT_EQ(returnBlock, (struct Header *)&memblock[10]);
+    EXPECT_EQ(returnBlock, (struct Header *)&memblock[0]);
 
     //fail test//
     status = findAvailableBlockBiggerThan((struct Header *)&memblock[0], &returnBlock, failFindTestSize);

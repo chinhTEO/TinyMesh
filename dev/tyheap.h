@@ -24,7 +24,7 @@ void *tyheap_flash_alloc( size_t size );
 void *tyheap_tmp_alloc(size_t size, unsigned char ** ptrAddr);
 void  tyheap_free( void *ptr );
 
-void  tyheap_organize(void );
+void  tyheap_organize( void );
 
 #if DEBUG
 
@@ -85,6 +85,7 @@ unsigned short expandFlashSeg(struct Header **startBlock, size_t dataSize);
 unsigned short findAvailableBlockBiggerThan(struct Header *startBlock, struct Header **returnBlock, size_t size);
 unsigned short combineFreeBlock(struct Header *startBlock);
 void setPtrOfTempToNULL(struct Header *block);
+void clearAllTempMemory();
 
 extern unsigned char MEMBLOCK[SIZE_OF_HEAP];
 extern unsigned char *START_FLASH_SEG; 
