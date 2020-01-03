@@ -14,7 +14,7 @@ extern "C" {
 
 #ifdef UTEST
     //#define SIZE_OF_HEAP 100
-    #define SIZE_OF_HEAP 1000
+    #define SIZE_OF_HEAP 2000
 #else 
     #define SIZE_OF_HEAP 300
 #endif

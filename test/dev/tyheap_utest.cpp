@@ -742,7 +742,7 @@ TEST_F(tyheap_utest, tyheap_delete_alloc){
  */
 TEST_F(tyheap_utest, tyheap_perfomance){
     unsigned int maxArray = 20, allocNum = 0, freeNum = 0;
-    unsigned int maxAlocationSize = 50;
+    unsigned int maxAlocationSize = 150;
     int indexFail = 0;
     std::vector<unsigned char *>memArray;
     unsigned int numberOfAction = 5000000;
@@ -751,7 +751,7 @@ TEST_F(tyheap_utest, tyheap_perfomance){
     for(unsigned int i = 0; i < numberOfAction; i++){
         int result = rand() % 30;
         if(result >= 20){
-            unsigned int thisSize = rand() % 100;
+            unsigned int thisSize = rand() % maxAlocationSize;
             if(thisSize == 0)
                 thisSize = 5;
             unsigned char *mem = (unsigned char *)tyheap_alloc(thisSize);
@@ -772,8 +772,8 @@ TEST_F(tyheap_utest, tyheap_perfomance){
         indexFail++;
         //printf("i am at : %d \n", i);
     }
-    tyheap_printmem(1000);
-    tyheap_printblock();
     printf("this fail at : %d (alloc : %d | free : %d | detla : %d )\n", indexFail, allocNum, freeNum, allocNum - freeNum);
+    tyheap_printblock();
+    tyheap_printmem(SIZE_OF_HEAP);
     EXPECT_EQ(indexFail, numberOfAction);
 }
