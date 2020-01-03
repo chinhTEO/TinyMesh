@@ -118,7 +118,8 @@ unsigned short expandNormalSeg(struct Header *block, size_t dataSize){
         block->next   = sizeof(struct Header) + dataSize;
 
         endBlock = NEXT_BLOCK_OF_(block);
-        endBlock->status = END; 
+        endBlock->status = END;
+        endBlock->next   = 0; 
 
         END_NORMAL_SEG = (unsigned char *)endBlock + 1;
 
@@ -161,18 +162,18 @@ unsigned short combineFreeBlock(struct Header *startBlock){
     struct Header *block = startBlock;
     struct Header *nblock;
     unsigned short totalDataSize = 0;
-    if(IS_STATUS_(block, FREE)){
-        totalDataSize = block->next - sizeof(struct Header);
-        while(1){
-            nblock = NEXT_BLOCK_OF_(block);
-            if(IS_STATUS_(nblock, FREE) && (block->next + nblock->next) <= 16384){ // our size limit   
-                block->next = block->next + nblock->next;
-                totalDataSize = block->next - sizeof(struct Header);
-            }else{
-                break;
-            }
+  
+    totalDataSize = block->next - sizeof(struct Header);
+    while(1){
+        nblock = NEXT_BLOCK_OF_(block);
+        if(IS_STATUS_(nblock, FREE) && (block->next + nblock->next) <= 16384){ // our size limit   
+            block->next = block->next + nblock->next;
+            totalDataSize = block->next - sizeof(struct Header);
+        }else{
+            break;
         }
     }
+    
     return totalDataSize;
 }
 
@@ -203,11 +204,13 @@ void *tyheap_alloc( size_t size ){
     if(status == SUCCESS){
         status = splitBlock(block, size, OFFSET_SPLIT_SIZE);
         block->status = BUSY;
+        //memset(DATA_ADDR_OF_(block), 0xaa, block->next - 2);
         return (void *)DATA_ADDR_OF_(block);
     }else{ // fail
         status = expandNormalSeg(block, size);
         if(status == SUCCESS){
             block->status = BUSY;
+            //memset(DATA_ADDR_OF_(block), 0xaa, block->next - 2);
             return (void *)DATA_ADDR_OF_(block);
         }else{ // fail 
             return NULL;
@@ -280,6 +283,10 @@ void tyheap_free( void *ptr ){
         block->next   = 0;
         END_NORMAL_SEG = (unsigned char *)block + 1;
     }
+
+    // if(block->status != END){
+    //     memset((unsigned char *)block + 2, 0xff, block->next - 3);
+    // }
 }
 
 void tyheap_organize(void ){
@@ -307,6 +314,18 @@ void tyheap_organize(void ){
 }
 
 #if DEBUG
+
+void tyheap_printblock(){
+    struct Header *block = (struct Header *)MEMBLOCK;
+    unsigned int count = 0;
+    while(!IS_STATUS_(block, END)){
+        printf("block %d (0x%lx) : status %d : value %d \n", count, (unsigned long)block,block->status, block->next);
+        block = NEXT_BLOCK_OF_(block);
+        count++;
+    }
+    printf("end block 0x%lx ; END normal block 0x%lx \n", (unsigned long)block, (unsigned long)END_NORMAL_SEG);
+    printf("start flash block 0x%lx \n", (unsigned long)START_FLASH_SEG);
+}
 
 void tyheap_printmem(unsigned int size) {
     unsigned int i = 0;

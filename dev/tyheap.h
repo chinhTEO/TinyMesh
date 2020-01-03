@@ -13,7 +13,8 @@ extern "C" {
 #endif
 
 #ifdef UTEST
-    #define SIZE_OF_HEAP 100
+    //#define SIZE_OF_HEAP 100
+    #define SIZE_OF_HEAP 1000
 #else 
     #define SIZE_OF_HEAP 300
 #endif
@@ -29,6 +30,7 @@ void  tyheap_organize( void );
 #if DEBUG
 
 void tyheap_printmem(unsigned int size);
+void tyheap_printblock();
 
 #endif
 

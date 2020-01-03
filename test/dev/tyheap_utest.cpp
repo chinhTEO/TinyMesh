@@ -2,6 +2,9 @@
 #include "tyheap.h"
 #include "tydebug.h"
 #include <iostream>
+#include <ctime>
+#include <cstdlib>
+#include <vector>
 
 class tyheap_utest: public ::testing::Test {
     protected: 
@@ -652,7 +655,7 @@ TEST_F(tyheap_utest, tyheap_alloc_tmp_2){
  * 
  */
 TEST_F(tyheap_utest, tyheap_alloc_flash_1){
-    const unsigned short testMemSize = 64;
+    const unsigned short testMemSize = 62;
     struct Header *block;
 
     unsigned char memblock[testMemSize];
@@ -682,7 +685,7 @@ TEST_F(tyheap_utest, tyheap_alloc_flash_1){
     // tyheap_printmem(100);
     // tydebug_printmem(memblock, 62);
 
-    for (int i = 0; i < testMemSize; ++i) {
+    for (int i = 0; i < testMemSize; i++) {
         EXPECT_EQ(START_FLASH_SEG[i], memblock[i]) << " differ at index " << i;
     }
 }
@@ -732,4 +735,45 @@ TEST_F(tyheap_utest, tyheap_delete_alloc){
     EXPECT_EQ(block->status, END);
 }
 
-
+/**
+ * @brief Construct a new test f object
+ * we try to allocande aloct
+ * 
+ */
+TEST_F(tyheap_utest, tyheap_perfomance){
+    unsigned int maxArray = 20, allocNum = 0, freeNum = 0;
+    unsigned int maxAlocationSize = 50;
+    int indexFail = 0;
+    std::vector<unsigned char *>memArray;
+    unsigned int numberOfAction = 5000000;
+    
+    srand(time(0));
+    for(unsigned int i = 0; i < numberOfAction; i++){
+        int result = rand() % 30;
+        if(result >= 20){
+            unsigned int thisSize = rand() % 100;
+            if(thisSize == 0)
+                thisSize = 5;
+            unsigned char *mem = (unsigned char *)tyheap_alloc(thisSize);
+            allocNum++;
+            if(mem == (unsigned char *)NULL){
+                printf("required size : %d \n", thisSize);
+                break;
+            }
+            memArray.push_back(mem);
+        }else{
+            if(!memArray.empty()){
+                freeNum++;
+                unsigned int number = rand() % memArray.size();
+                tyheap_free(memArray[number]);
+                memArray.erase(memArray.begin() + number);
+            }
+        }
+        indexFail++;
+        //printf("i am at : %d \n", i);
+    }
+    tyheap_printmem(1000);
+    tyheap_printblock();
+    printf("this fail at : %d (alloc : %d | free : %d | detla : %d )\n", indexFail, allocNum, freeNum, allocNum - freeNum);
+    EXPECT_EQ(indexFail, numberOfAction);
+}
