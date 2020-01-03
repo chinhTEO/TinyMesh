@@ -200,7 +200,24 @@ void *tyheap_alloc( size_t size ){
 }
 
 void *tyheap_flash_alloc( size_t size ){
+    struct Header* block;
+    unsigned short status = FAIL;
 
+    status = findAvailableBlockBiggerThan((struct Header*)START_FLASH_SEG, &block, size);
+    
+    if(status == SUCCESS){
+        status = splitBlock(block, size, OFFSET_SPLIT_SIZE);
+        block->status = BUSY;
+        return (void *)DATA_ADDR_OF_(block);
+    }else{
+        status = expandFlashSeg(&block, size);
+        if(status == SUCCESS){
+            block->status = BUSY;
+            return (void *)DATA_ADDR_OF_(block);
+        }else{ // fail 
+            return NULL;
+        }
+    }
 }
 
 //structure [HEADER][DATA][ADDR]

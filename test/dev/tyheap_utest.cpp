@@ -628,6 +628,41 @@ TEST_F(tyheap_utest, tyheap_alloc_tmp_2){
     }
 }
 
+TEST_F(tyheap_utest, tyheap_alloc_flash_1){
+    const unsigned short testMemSize = 64;
+    struct Header *block;
+
+    unsigned char memblock[testMemSize];
+    memset(memblock, 0, 62);
+    // create 3 block 20 size each
+    block = (struct Header *)&memblock[0];
+    block->status = BUSY;
+    block->next   = 10;
+
+    block = (struct Header *)&memblock[10];
+    block->status = BUSY;
+    block->next   = 20;
+
+    block = (struct Header *)&memblock[30];
+    block->status = BUSY;
+    block->next   = 30;
+
+    block = (struct Header *)&memblock[60];
+    block->status = END;
+    block->next   = 0;
+
+    unsigned char *allocNem = (unsigned char *)tyheap_flash_alloc(28);
+    
+    allocNem = (unsigned char *)tyheap_flash_alloc(18);
+    allocNem = (unsigned char *)tyheap_flash_alloc(8);
+
+    // tyheap_printmem(100);
+    // tydebug_printmem(memblock, 62);
+
+    for (int i = 0; i < testMemSize; ++i) {
+        EXPECT_EQ(START_FLASH_SEG[i], memblock[i]) << " differ at index " << i;
+    }
+}
 
 /**
  * @brief Construct a new test f object
@@ -636,7 +671,6 @@ TEST_F(tyheap_utest, tyheap_alloc_tmp_2){
  */
 TEST_F(tyheap_utest, tyheap_delete_alloc){
     unsigned char *allocNem_1 = (unsigned char *)tyheap_alloc(8);
-    
     unsigned char *allocNem_2 = (unsigned char *)tyheap_alloc(18);
     unsigned char *allocNem_3 = (unsigned char *)tyheap_tmp_alloc(28 - sizeof(void *), (unsigned char **)&allocNem_3);
     unsigned char *allocNem_4 = (unsigned char *)tyheap_tmp_alloc(18 - sizeof(void *), (unsigned char **)&allocNem_4);
@@ -645,7 +679,16 @@ TEST_F(tyheap_utest, tyheap_delete_alloc){
     EXPECT_NE(allocNem_3, (unsigned char *)NULL);
     tyheap_free(allocNem_3);
     EXPECT_EQ(allocNem_3, (unsigned char *)NULL);
+
     EXPECT_NE(allocNem_4, (unsigned char *)NULL);
     tyheap_free(allocNem_4);
     EXPECT_EQ(allocNem_4, (unsigned char *)NULL);
+    tyheap_free(allocNem_2);
+    tyheap_free(allocNem_1);    
+    
+    //print mem
+    struct Header *block = (struct Header *)MEMBLOCK;
+    EXPECT_EQ(block->next, 80);
+    EXPECT_EQ(block->status, FREE);
 }
+

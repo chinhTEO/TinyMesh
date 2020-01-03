@@ -9,7 +9,7 @@ void tydebug_printmem(unsigned char *addr, unsigned short size){
     unsigned int count = 0;
     
     printf("---------------mem-----------------\n");
-    printf("start : 0x%x\n", address);
+    printf("start : 0x%lx\n", address);
     printf(" \t|");
     for(i = 0; i < 16; i++){
         printf("\033[0;33m");
@@ -26,7 +26,7 @@ void tydebug_printmem(unsigned char *addr, unsigned short size){
     mask_high = (address >> 4) & 0xfff;
 
     printf("\033[0;33m");
-    printf("0x%x",mask_high);
+    printf("0x%lx",mask_high);
     printf("\033[0m");
     printf("\t|");
     
@@ -55,7 +55,7 @@ void tydebug_printmem(unsigned char *addr, unsigned short size){
         if(i % 16 == 15){
             printf("\t|\n");
             printf("\033[0;33m");
-            printf("0x%x",++mask_high);
+            printf("0x%lx",++mask_high);
             printf("\033[0m");
             printf("\t|");
         }else{
