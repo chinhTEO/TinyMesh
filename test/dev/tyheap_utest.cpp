@@ -774,7 +774,7 @@ TEST_F(tyheap_utest, tyheap_perfomance){
     }
     printf("this fail at : %d (alloc : %d | free : %d | detla : %d )\n", indexFail, allocNum, freeNum, allocNum - freeNum);
     tyheap_printblock();
-    tyheap_printmem(SIZE_OF_HEAP);
+    //tyheap_printmem(SIZE_OF_HEAP);
     EXPECT_EQ(indexFail, numberOfAction);
 }
 
@@ -860,6 +860,6 @@ TEST_F(tyheap_utest, tyheap_flash_perfomance){
     }
     printf("this fail at : %d (alloc : %d | free : %d | detla : %d )\n", indexFail, allocNum, freeNum, allocNum - freeNum);
     tyheap_printblock();
-    tyheap_printmem(SIZE_OF_HEAP);
+    //tyheap_printmem(SIZE_OF_HEAP);
     EXPECT_EQ(indexFail, numberOfAction);
 }

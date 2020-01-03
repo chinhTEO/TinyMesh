@@ -84,12 +84,10 @@ unsigned short findAvailableBlockBiggerThan(struct Header *startBlock, struct He
     unsigned short status = FAIL;
     while(!IS_STATUS_(block, END)){
         if(IS_STATUS_(block, FREE)){
-            combineFreeBlock(block);
-            if(DATA_SIZE_OF_(block) >= size){
+            if(combineFreeBlock(block) >= size){
                 status = SUCCESS;
                 break;
             }
-           
         }
         block = NEXT_BLOCK_OF_(block);
     }
@@ -152,14 +150,12 @@ unsigned short combineFreeBlock(struct Header *startBlock){
     unsigned short totalDataSize = 0;
   
     totalDataSize = block->next - sizeof(struct Header);
-    while(1){
+    nblock = NEXT_BLOCK_OF_(block);
+    
+    while(IS_STATUS_(nblock, FREE) && (block->next + nblock->next) <= 16384){
+        block->next = block->next + nblock->next;
+        totalDataSize = block->next - sizeof(struct Header);
         nblock = NEXT_BLOCK_OF_(block);
-        if(IS_STATUS_(nblock, FREE) && (block->next + nblock->next) <= 16384){ // our size limit   
-            block->next = block->next + nblock->next;
-            totalDataSize = block->next - sizeof(struct Header);
-        }else{
-            break;
-        }
     }
     
     return totalDataSize;
