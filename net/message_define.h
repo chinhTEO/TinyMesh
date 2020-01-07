@@ -29,11 +29,11 @@ struct Message_variable_define {
 
 struct Message_fixed_define {
     unsigned short length;
-    void (*recv_callback)(uint8_t *data, unsigned short len);     
+    unsigned short (*recv_callback)(uint8_t *data, unsigned short len);     
 };
 
-extern struct Message_variable_define message_variable_list[NUMBER_OF_MESSAGE_VARIABLE];
-extern struct Message_fixed_define message_fixed_list[NUMBER_OF_MESSAGE_FIXED];
+extern const struct Message_variable_define message_variable_list[NUMBER_OF_MESSAGE_VARIABLE];
+extern const struct Message_fixed_define message_fixed_list[NUMBER_OF_MESSAGE_FIXED];
 
 #ifdef __cplusplus
 } // closing brace for extern "C"

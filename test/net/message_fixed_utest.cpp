@@ -19,7 +19,21 @@ class message_fixed_utest: public ::testing::Test {
 
 };
 
-TEST(message_fixed_utest, message_fixed_create){
+TEST_F(message_fixed_utest, message_fixed_create){
     char data[] = "hello";
     struct Message_out *message_packet = (struct Message_out *)message_fixed_create(MESSAGE_UTEST_FIXED, (uint8_t *)data, 200);
+    EXPECT_EQ(message_packet->delay, 200);
+    EXPECT_EQ(message_packet->length, message_fixed_list[MESSAGE_UTEST_FIXED].length);
+    uint8_t header = (uint8_t)(MESSAGE_UTEST_FIXED << 1 | FIXED);
+    EXPECT_EQ(message_packet->data[0], header);
+    for(int i = 0; i < message_fixed_list[MESSAGE_UTEST_FIXED].length; i++){
+        EXPECT_EQ(message_packet->data[i+1], data[i]);
+    }
+}
+
+TEST_F(message_fixed_utest, message_fixed_proccess){
+    uint8_t testMessage[7];
+    memcpy(&testMessage[1], "hello", 6);
+    testMessage[0] = (uint8_t)(MESSAGE_UTEST_FIXED << 1 | FIXED);
+    EXPECT_EQ(message_fixed_proccess(testMessage), 6);
 }

@@ -4,6 +4,6 @@ uint8_t *message_variable_create(enum MESSAGE_FIXED type, unsigned short *data, 
 
 }
 
-uint8_t message_variable_proccess(uint8_t *data){
+unsigned short message_variable_proccess(uint8_t *data){
     
 }

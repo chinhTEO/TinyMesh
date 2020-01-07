@@ -16,6 +16,15 @@ struct Message_out{
     uint8_t *data;
 };
 
+unsigned short message_process_list(uint8_t *data, unsigned short len);
+
+#if UTEST
+
+unsigned short message_process(uint8_t *data);
+enum MESSAGE_LENGTH_TYPE getTypeOfMessage(uint8_t *data);
+
+#endif
+
 #ifdef __cplusplus
 } // closing brace for extern "C"
 #endif
