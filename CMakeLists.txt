@@ -6,6 +6,7 @@ set(BUILD_TEST ON)
 
 add_subdirectory(lib)
 add_subdirectory(dev) 
+add_subdirectory(net) 
 
 if(BUILD_TEST)
     add_subdirectory(test)

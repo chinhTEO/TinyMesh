@@ -1,5 +1,8 @@
 #ifndef MESSAGE_H_
 #define MESSAGE_H_
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "stdint.h"
 
 enum MESSAGE_LENGTH_TYPE{
@@ -7,10 +10,13 @@ enum MESSAGE_LENGTH_TYPE{
     VARIABLE
 };
 
-struct message_info {
+struct Message_out{
     unsigned short length;
-    enum MESSAGE_LENGTH_TYPE type;
-    void (*recv_callback)(unit8_t *data, unsigned short len);
+    unsigned short delay;
+    uint8_t *data;
 };
 
+#ifdef __cplusplus
+} // closing brace for extern "C"
+#endif
 #endif //MESSAGE_H_
