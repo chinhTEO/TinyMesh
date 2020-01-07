@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.5) # Definitions
 
 set(PROJECT_NAME tymesh) 
 
-set(BUILD_TEST ON)
 set(BUILD_TOOL ON)
 
 add_subdirectory(lib)

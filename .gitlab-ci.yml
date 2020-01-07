@@ -5,7 +5,9 @@ job-build:
     - git submodule init
     - git submodule update
     - cd build
-    - cmake ..
+    - cmake .. -DBUILD_TEST=OFF
+    - make -j
+    - cmake .. -DBUILD_TEST=ON
     - make -j
     - ./test/dev/dev_utest
     - ./test/net/net_utest
