@@ -94,6 +94,12 @@ extern unsigned char *START_FLASH_SEG;
 extern unsigned char *END_NORMAL_SEG;
 #endif
 
+#define TYHEAP_MONITOR 1
+
+#if TYHEAP_MONITOR 
+void tyheap_info(unsigned short mode);
+#endif
+
 #ifdef __cplusplus
 } // closing brace for extern "C"
 #endif

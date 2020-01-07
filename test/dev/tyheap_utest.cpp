@@ -745,12 +745,12 @@ TEST_F(tyheap_utest, tyheap_perfomance){
     unsigned int maxAlocationSize = 150;
     int indexFail = 0;
     std::vector<unsigned char *>memArray;
-    unsigned int numberOfAction = 5000000;
+    unsigned int numberOfAction = 10000000;
     
     srand(time(0));
     for(unsigned int i = 0; i < numberOfAction; i++){
         int result = rand() % 30;
-        if(result >= 20){
+        if(result >= 21){
             unsigned int thisSize = rand() % maxAlocationSize;
             if(thisSize == 0)
                 thisSize = 5;
@@ -773,7 +773,7 @@ TEST_F(tyheap_utest, tyheap_perfomance){
         //printf("i am at : %d \n", i);
     }
     printf("this fail at : %d (alloc : %d | free : %d | detla : %d )\n", indexFail, allocNum, freeNum, allocNum - freeNum);
-    tyheap_printblock();
+    //tyheap_printblock();
     //tyheap_printmem(SIZE_OF_HEAP);
     EXPECT_EQ(indexFail, numberOfAction);
 }
@@ -797,7 +797,9 @@ TEST_F(tyheap_utest, tyheap_perfomance){
 //             unsigned int thisSize = rand() % maxAlocationSize;
 //             if(thisSize == 0)
 //                 thisSize = 5;
-//             unsigned char *mem = (unsigned char *)tyheap_tmp_alloc(thisSize, (unsigned char **)&mem);
+//             unsigned char *mem;
+//             mem = (unsigned char *)tyheap_tmp_alloc(thisSize, (unsigned char **)NULL);
+//             memArray.push_back(mem);
 //             allocNum++;
 //             if(mem == (unsigned char *)NULL){
 //                 printf("required size : %d \n", thisSize);
@@ -809,6 +811,7 @@ TEST_F(tyheap_utest, tyheap_perfomance){
 //                 freeNum++;
 //                 unsigned int number = rand() % memArray.size();
 //                 tyheap_free(memArray[number]);
+//                 EXPECT_NE(memArray[number], (unsigned char*)NULL);
 //                 memArray.erase(memArray.begin() + number);
 //             }
 //         }
@@ -831,12 +834,12 @@ TEST_F(tyheap_utest, tyheap_flash_perfomance){
     unsigned int maxAlocationSize = 150;
     int indexFail = 0;
     std::vector<unsigned char *>memArray;
-    unsigned int numberOfAction = 5000000;
+    unsigned int numberOfAction = 10000000;
     
     srand(time(0));
     for(unsigned int i = 0; i < numberOfAction; i++){
         int result = rand() % 30;
-        if(result >= 20){
+        if(result >= 21){
             unsigned int thisSize = rand() % maxAlocationSize;
             if(thisSize == 0)
                 thisSize = 5;
@@ -859,7 +862,7 @@ TEST_F(tyheap_utest, tyheap_flash_perfomance){
         //printf("i am at : %d \n", i);
     }
     printf("this fail at : %d (alloc : %d | free : %d | detla : %d )\n", indexFail, allocNum, freeNum, allocNum - freeNum);
-    tyheap_printblock();
+    //tyheap_printblock();
     //tyheap_printmem(SIZE_OF_HEAP);
     EXPECT_EQ(indexFail, numberOfAction);
 }

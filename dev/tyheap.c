@@ -61,6 +61,29 @@ unsigned char *END_NORMAL_SEG;
 const uint16_t sizeList[NUM_OF_FREE_BLOCK_CACHE] = { 128, 64, 32, 16, 8 }; // free space Guarantee
 unsigned short freeBlockList[NUM_OF_FREE_BLOCK_CACHE];
 
+#if TYHEAP_MONITOR 
+unsigned int memory_free = SIZE_OF_HEAP;
+#define TYHEAP_FREEMEM_DECREASE(size) memory_free = memory_free - size
+#define TYHEAP_FREEMEM_INCREASE(size) memory_free = memory_free + size
+
+void tyheap_info(unsigned short mode){
+    if(mode >= 1){
+        printf("mem : free: %d/%d ( %.2f %%)\n",memory_free, 
+                                                 SIZE_OF_HEAP,
+                                                (float)(memory_free/SIZE_OF_HEAP)*100);
+    }
+    if(mode >= 2){
+        printf("ext: gap %ld ( %.2f %%)\n", START_FLASH_SEG - END_NORMAL_SEG,
+                                          (float)(START_FLASH_SEG - END_NORMAL_SEG)/SIZE_OF_HEAP);
+    }
+    if(mode >= 3){
+        printf("def: %ld ( %.2f %%)\n ", memory_free - (START_FLASH_SEG - END_NORMAL_SEG),
+                                       (float)(memory_free - (START_FLASH_SEG - END_NORMAL_SEG))/SIZE_OF_HEAP);
+    }
+}
+
+#endif
+
 void  tyheap_init( void ){
     //[firstblock][secondblock][data]
     // nextindex == 0 // last memory
@@ -188,12 +211,22 @@ void *tyheap_alloc( size_t size ){
     if(status == SUCCESS){
         status = splitBlock(block, size, OFFSET_SPLIT_SIZE);
         block->status = BUSY;
+
+        #if TYHEAP_MONITOR
+            TYHEAP_FREEMEM_DECREASE(block->next);
+        #endif
+        
         //memset(DATA_ADDR_OF_(block), 0xaa, block->next - 2);
         return (void *)DATA_ADDR_OF_(block);
     }else{ // fail
         status = expandNormalSeg(block, size);
         if(status == SUCCESS){
             block->status = BUSY;
+            
+            #if TYHEAP_MONITOR
+                TYHEAP_FREEMEM_DECREASE(block->next);
+            #endif
+            
             //memset(DATA_ADDR_OF_(block), 0xaa, block->next - 2);
             return (void *)DATA_ADDR_OF_(block);
         }else{ // fail 
@@ -211,11 +244,21 @@ void *tyheap_flash_alloc( size_t size ){
     if(status == SUCCESS){
         status = splitBlock(block, size, OFFSET_SPLIT_SIZE);
         block->status = BUSY;
+        
+        #if TYHEAP_MONITOR
+            TYHEAP_FREEMEM_DECREASE(block->next);
+        #endif
+        
         return (void *)DATA_ADDR_OF_(block);
     }else{
         status = expandFlashSeg(&block, size);
         if(status == SUCCESS){
             block->status = BUSY;
+
+            #if TYHEAP_MONITOR
+                TYHEAP_FREEMEM_DECREASE(block->next);
+            #endif
+            
             return (void *)DATA_ADDR_OF_(block);
         }else{ // fail 
             return NULL;
@@ -235,12 +278,22 @@ void *tyheap_tmp_alloc(size_t size, unsigned char ** ptrAddr){
         status = splitBlock(block, dataSize, OFFSET_SPLIT_SIZE);
         block->status = TEMP;
         memcpy((unsigned char *)block + sizeof(struct Header) + size, &ptrAddr, sizeof(unsigned char *));
+        
+        #if TYHEAP_MONITOR
+            TYHEAP_FREEMEM_DECREASE(block->next);
+        #endif
+        
         return (void *)DATA_ADDR_OF_(block);
     }else{ // fail
         status = expandNormalSeg(block, dataSize);
         if(status == SUCCESS){
             block->status = TEMP;
             memcpy((unsigned char *)block + sizeof(struct Header) + size, &ptrAddr, sizeof(unsigned char *));
+            
+            #if TYHEAP_MONITOR
+                TYHEAP_FREEMEM_DECREASE(block->next);
+            #endif
+
             return (void *)DATA_ADDR_OF_(block);
         }else{ // fail 
             return NULL;
@@ -252,8 +305,16 @@ void tyheap_free( void *ptr ){
     struct Header *block = BLOCK_OF_DATA_ADDR_(ptr);
     //we dont use switch because it may have problem with switch statment in Protothreads
     if(IS_STATUS_(block, BUSY)){
+        #if TYHEAP_MONITOR
+            TYHEAP_FREEMEM_INCREASE(block->next);
+        #endif
+        
         block->status = FREE;
     }else if(IS_STATUS_(block, TEMP)){
+        #if TYHEAP_MONITOR
+            TYHEAP_FREEMEM_INCREASE(block->next);
+        #endif
+
         setPtrOfTempToNULL(block);
         block->status = FREE;
     }
