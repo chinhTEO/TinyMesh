@@ -7,4 +7,5 @@ job-build:
     - cd build
     - cmake ..
     - make -j
-    - ./test/dev_utest
+    - ./test/dev/dev_utest
+    - ./test/net/net_utest
