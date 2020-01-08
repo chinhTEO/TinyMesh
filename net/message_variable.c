@@ -7,7 +7,7 @@
 #define LENGH_INFO_POS 1
 #define DATA_POS 2
 
-struct Message_out *message_variable_create(enum MESSAGE_VARIABLE type, uint8_t *data, unsigned short length, unsigned short delay){
+struct Message_out *message_variable_create(enum MESSAGE_VARIABLE type, uint8_t *data, unsigned short length, enum MESSAGE_PRIOITY priority){
     struct Message_out *message_packet = (struct Message_out *)tyheap_flash_alloc(sizeof message_packet);
     uint8_t *packet_data = (uint8_t *)tyheap_flash_alloc(length + SIZE_OF_VARIABLE_HEADER);
 
@@ -21,7 +21,7 @@ struct Message_out *message_variable_create(enum MESSAGE_VARIABLE type, uint8_t 
     memcpy(&packet_data[DATA_POS], data, length);
 
     message_packet->length = length + SIZE_OF_VARIABLE_HEADER;
-    message_packet->delay = delay;
+    message_packet->priority = priority;
     message_packet->data = packet_data;
 
     return message_packet;

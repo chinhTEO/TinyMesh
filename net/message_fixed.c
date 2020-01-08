@@ -4,7 +4,7 @@
 
 #define SIZE_OF_FIXED_HEADER 1
 
-struct Message_out *message_fixed_create(enum MESSAGE_FIXED type, uint8_t *data, unsigned short delay){
+struct Message_out *message_fixed_create(enum MESSAGE_FIXED type, uint8_t *data, enum MESSAGE_PRIOITY priority){
     struct Message_out *message_packet = (struct Message_out *)tyheap_flash_alloc(sizeof message_packet);
     uint8_t *packet_data = (uint8_t *)tyheap_flash_alloc(message_fixed_list[type].length + SIZE_OF_FIXED_HEADER);
 
@@ -17,7 +17,7 @@ struct Message_out *message_fixed_create(enum MESSAGE_FIXED type, uint8_t *data,
 
     message_packet->data = packet_data;
     message_packet->length = message_fixed_list[type].length + SIZE_OF_FIXED_HEADER;
-    message_packet->delay = delay;
+    message_packet->priority = priority;
 
     return message_packet;
 }

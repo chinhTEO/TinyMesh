@@ -21,8 +21,8 @@ class message_variable_utest: public ::testing::Test {
 
 TEST_F(message_variable_utest, message_variable_create){
     char data[] = "hello";
-    struct Message_out *message_packet = (struct Message_out *)message_variable_create(MESSAGE_UTEST_VARIABLE, (uint8_t *)data, 6, 200);
-    EXPECT_EQ(message_packet->delay, 200);
+    struct Message_out *message_packet = (struct Message_out *)message_variable_create(MESSAGE_UTEST_VARIABLE, (uint8_t *)data, 6, HIGH_PRIORITY);
+    EXPECT_EQ(message_packet->priority, HIGH_PRIORITY);
     EXPECT_EQ(message_packet->length, 8);
 
     uint8_t header = (uint8_t)(MESSAGE_UTEST_VARIABLE << 1 | VARIABLE);

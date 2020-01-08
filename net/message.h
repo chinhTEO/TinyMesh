@@ -5,6 +5,11 @@ extern "C" {
 #endif
 #include "stdint.h"
 
+enum MESSAGE_PRIOITY {
+    LOW_PRIORITY,
+    HIGH_PRIORITY
+};
+
 enum MESSAGE_LENGTH_TYPE{
     FIXED,
     VARIABLE
@@ -12,7 +17,7 @@ enum MESSAGE_LENGTH_TYPE{
 
 struct Message_out{
     unsigned short length;
-    unsigned short delay;
+    enum MESSAGE_PRIOITY priority;
     uint8_t *data;
 };
 

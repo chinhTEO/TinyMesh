@@ -21,8 +21,8 @@ class message_fixed_utest: public ::testing::Test {
 
 TEST_F(message_fixed_utest, message_fixed_create){
     char data[] = "hello";
-    struct Message_out *message_packet = (struct Message_out *)message_fixed_create(MESSAGE_UTEST_FIXED, (uint8_t *)data, 200);
-    EXPECT_EQ(message_packet->delay, 200);
+    struct Message_out *message_packet = (struct Message_out *)message_fixed_create(MESSAGE_UTEST_FIXED, (uint8_t *)data, HIGH_PRIORITY);
+    EXPECT_EQ(message_packet->priority, HIGH_PRIORITY);
     EXPECT_EQ(message_packet->length, message_fixed_list[MESSAGE_UTEST_FIXED].length + 1);
     uint8_t header = (uint8_t)(MESSAGE_UTEST_FIXED << 1 | FIXED);
     EXPECT_EQ(message_packet->data[0], header);
