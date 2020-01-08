@@ -2,11 +2,12 @@
 #include <string.h>
 #if UTEST
 #include "utest_fixed.h"
+#include "utest_variable.h"
 #endif
 
 const struct Message_variable_define message_variable_list[NUMBER_OF_MESSAGE_VARIABLE] = {
 #if UTEST
-    NULL  
+    utest_variable_callback,
 #endif
 };
 

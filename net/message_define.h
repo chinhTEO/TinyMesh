@@ -11,7 +11,7 @@ extern "C" {
 
 enum MESSAGE_VARIABLE {
 #if UTEST
-    MESSAGE_UTEST_VAR, 
+    MESSAGE_UTEST_VARIABLE, 
 #endif
     MESSAGE_ABC,
 };
@@ -24,7 +24,7 @@ enum MESSAGE_FIXED {
 };
 
 struct Message_variable_define {
-    void (*recv_callback)(uint8_t *data, unsigned short len);
+    unsigned short (*recv_callback)(uint8_t *data, unsigned short len);
 };
 
 struct Message_fixed_define {

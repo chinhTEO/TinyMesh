@@ -16,7 +16,10 @@ include_directories("${CMAKE_SOURCE_DIR}/net")
 enable_testing()
 
 SET(sourcesUtest
-    message_fixed_utest.cpp)
+    message_fixed_utest.cpp
+    message_utest.cpp
+    message_variable_utest.cpp
+)
 
 add_executable(${utest} ${sourcesUtest})
 target_link_libraries(${utest} ${this} gtest_main gmock_main tymeshdev tymeshnet)

@@ -9,10 +9,12 @@ endif()
 
 SET(headers
     utest_fixed.h
+    utest_variable.h
 )
 
 SET(sources
     utest_fixed.c
+    utest_variable.c
 )
 
 include_directories(.)

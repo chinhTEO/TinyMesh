@@ -5,7 +5,7 @@ extern "C" {
 #endif
 #include "message_define.h"
 
-uint8_t *message_variable_create(enum MESSAGE_FIXED type, unsigned short *data, unsigned short length, unsigned short delay);
+struct Message_out *message_variable_create(enum MESSAGE_VARIABLE type, uint8_t *data, unsigned short length, unsigned short delay);
 
 unsigned short message_variable_proccess(uint8_t *data);
 #ifdef __cplusplus
