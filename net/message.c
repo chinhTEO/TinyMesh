@@ -23,11 +23,13 @@ unsigned short message_process(uint8_t *data){
 }
 
 
-unsigned short message_process_list(uint8_t *data, unsigned short len){
+unsigned short processMessageList(uint8_t *data, unsigned short len){
     unsigned short pos = 0;
     unsigned short package_len = 0;
     do{
         package_len = message_process(&data[pos]);
         pos += package_len;
     }while(pos < len - 1);
+
+    return pos;
 }

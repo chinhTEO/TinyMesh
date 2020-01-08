@@ -16,7 +16,7 @@ struct Message_out{
     uint8_t *data;
 };
 
-unsigned short message_process_list(uint8_t *data, unsigned short len);
+unsigned short processMessageList(uint8_t *data, unsigned short len);
 
 #if UTEST
 
