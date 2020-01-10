@@ -5,6 +5,7 @@
         "initializer_list": "c",
         "utility": "c",
         "string": "cpp",
-        "message_fixed.h": "c"
+        "message_fixed.h": "c",
+        "stdio.h": "c"
     }
 }

@@ -16,7 +16,8 @@ include_directories("${CMAKE_SOURCE_DIR}/net")
 enable_testing()
 
 SET(sourcesUtest
-    tyheap_utest.cpp)
+    tyheap_utest.cpp
+    queue_utest.cpp)
 
 add_executable(${utest} ${sourcesUtest})
 target_link_libraries(${utest} ${this} gtest_main gmock_main tymeshdev)

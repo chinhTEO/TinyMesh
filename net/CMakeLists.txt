@@ -14,6 +14,7 @@ SET(headers
     message_variable.h
     message_fixed.h
     message_define.h
+    tymesh_framer.h
 )
 
 SET(sources
@@ -21,6 +22,7 @@ SET(sources
     message_fixed.c
     message_define.c
     message.c
+    tymesh_framer.c
 )
 
 include_directories(.)
