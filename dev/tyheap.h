@@ -13,7 +13,7 @@ extern "C" {
     //#define SIZE_OF_HEAP 100
     #define SIZE_OF_HEAP 2000
 #else 
-    #define SIZE_OF_HEAP 300
+    #define SIZE_OF_HEAP 1000
 #endif
 
 void  tyheap_init( void );

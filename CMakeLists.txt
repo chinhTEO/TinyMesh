@@ -4,6 +4,7 @@ set(PROJECT_NAME tymesh)
 
 if(BUILD_TEST)
     set(BUILD_TOOL ON)
+    set(CMAKE_BUILD_TYPE Debug)
 endif()
 
 add_subdirectory(lib)

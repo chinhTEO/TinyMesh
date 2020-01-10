@@ -48,6 +48,10 @@ enum STATUS queue_push(struct Queue *queue, void *element){
     }
 }
 
+unsigned short queue_size(struct Queue *queue){
+    return queue->size;
+}
+
 void *queue_find(struct Queue *queue, bool (*conditionFunction)(void *element, unsigned short pos)){
     struct Node *node = queue->head;
     unsigned short pos = 0;
