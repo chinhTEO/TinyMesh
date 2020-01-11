@@ -13,7 +13,6 @@ void tymesh_framer_init();
 void tymesh_framer_add(struct Message_out *message);
 uint8_t *tymesh_framer_create(unsigned short *len);
 
-
 #if UTEST
 
 //------------------------ expose start --------------------------//

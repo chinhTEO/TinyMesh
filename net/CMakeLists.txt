@@ -3,8 +3,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 
 SET(this tymeshnet)
 
-add_subdirectory(module)
-
 if(BUILD_TEST)
     add_definitions(-DUTEST)
 endif()
@@ -26,7 +24,7 @@ SET(sources
 )
 
 include_directories(.)
-include_directories(./module)
+include_directories(../module)
 include_directories("${CMAKE_SOURCE_DIR}/dev")
 
 add_library(${this} STATIC ${headers} ${sources})

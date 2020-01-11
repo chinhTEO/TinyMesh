@@ -10,12 +10,15 @@ endif()
 SET(headers
     utest_fixed.h
     utest_variable.h
+    abc.h
 )
 
 SET(sources
     utest_fixed.c
     utest_variable.c
+    abc.c
 )
 
 include_directories(.)
+include_directories(../net)
 add_library(${this} STATIC ${headers} ${sources})
