@@ -8,7 +8,7 @@
 #define DATA_POS 2
 
 struct Message_out *message_variable_create(enum MESSAGE_VARIABLE type, uint8_t *data, unsigned short length, enum MESSAGE_PRIOITY priority){
-    struct Message_out *message_packet = (struct Message_out *)tyheap_flash_alloc(sizeof message_packet);
+    struct Message_out *message_packet = (struct Message_out *)tyheap_flash_alloc(sizeof(struct Message_out));
     uint8_t *packet_data = (uint8_t *)tyheap_flash_alloc(length + SIZE_OF_VARIABLE_HEADER);
 
     if(message_packet == NULL || packet_data == NULL){

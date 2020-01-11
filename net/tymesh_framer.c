@@ -7,6 +7,8 @@
 
 struct Queue lowPriorityMessageList;
 struct Queue highPriorityMessageList;
+struct Message_out *frame_header;
+
 
 void tymesh_framer_init(){
     queue_init(&lowPriorityMessageList, NUM_OF_LOW_PRIORITY_MES_BUFFER);
@@ -21,10 +23,17 @@ void tymesh_framer_add(struct Message_out *message){
     }
 }
 
-uint8_t *tymesh_framer_create(){
+uint8_t *tymesh_framer_create(unsigned short *len){
     unsigned short size = 0;
     struct Message_out *message;
-    uint8_t *outputFrame = tyheap_alloc(LIMIT_SIZE_OF_OUTPUT_FRAME);
+    uint8_t *outputFrame = tyheap_flash_alloc(LIMIT_SIZE_OF_OUTPUT_FRAME);
+
+    if(frame_header != NULL){
+        memcpy(&outputFrame[size], frame_header->data, frame_header->length); 
+        size = size + message->length;
+        tyheap_free(frame_header->data);
+        tyheap_free(frame_header); 
+    }
 
     while(queue_size(&highPriorityMessageList) != 0){
         message = (struct Message_out *)queue_frond(&highPriorityMessageList);
@@ -52,5 +61,6 @@ uint8_t *tymesh_framer_create(){
         }
     }
 
+    *len = size;
     return outputFrame;
 }
