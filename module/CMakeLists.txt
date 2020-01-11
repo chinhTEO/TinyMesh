@@ -21,4 +21,5 @@ SET(sources
 
 include_directories(.)
 include_directories(../net)
+include_directories(../dev)
 add_library(${this} STATIC ${headers} ${sources})
