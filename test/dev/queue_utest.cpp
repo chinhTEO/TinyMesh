@@ -18,8 +18,8 @@ class queue_utest: public ::testing::Test {
 
     struct Queue testQueue;
 
-    static bool find_name_50(void *element, unsigned short pos) {
-        if(((struct testClass *)element)->name == 50){
+    static bool find_name_50(void *element, unsigned short pos, void *arg) {
+        if(((struct testClass *)element)->name == *(int *)arg){
             return true;
         }
         return false;
@@ -89,7 +89,9 @@ TEST_F(queue_utest, queue_find){
     queue_push(&testQueue, &testElement_2);
     queue_push(&testQueue, &testElement_3);
 
-    struct testClass *element = (struct testClass *)queue_find(&testQueue, find_name_50);
+    int a = 50;
+
+    struct testClass *element = (struct testClass *)queue_find(&testQueue, find_name_50, &a);
 
     EXPECT_EQ(element, &testElement_2);
 }

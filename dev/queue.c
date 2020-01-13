@@ -52,12 +52,12 @@ unsigned short queue_size(struct Queue *queue){
     return queue->size;
 }
 
-void *queue_find(struct Queue *queue, bool (*conditionFunction)(void *element, unsigned short pos)){
+void *queue_find(struct Queue *queue, bool (*conditionFunction)(void *element, unsigned short pos, void *arg), void *arg){
     struct Node *node = queue->head;
     unsigned short pos = 0;
     if(queue->size != 0){
         while(queue->size != pos){
-            if(conditionFunction(node, pos)){
+            if(conditionFunction(node, pos, arg)){
                 return node;
             }
             node = (struct Node *)node->next;

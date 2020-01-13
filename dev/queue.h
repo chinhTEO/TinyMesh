@@ -28,7 +28,7 @@ void queue_pop(struct Queue *queue);
 enum STATUS queue_push(struct Queue *queue, void *element);
 unsigned short queue_size(struct Queue *queue);
 
-void *queue_find(struct Queue *queue, bool (*conditionFunction)(void *element, unsigned short pos));
+void *queue_find(struct Queue *queue, bool (*conditionFunction)(void *element, unsigned short pos, void *arg), void *arg);
 enum STATUS queue_remove(struct Queue *queue, bool (*conditionFunction)(void *element, unsigned short pos));
 
 #ifdef __cplusplus
