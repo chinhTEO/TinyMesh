@@ -6,6 +6,7 @@
         "utility": "c",
         "string": "cpp",
         "message_fixed.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "process.h": "c"
     }
 }

@@ -11,6 +11,7 @@ add_subdirectory(lib)
 add_subdirectory(dev) 
 add_subdirectory(net) 
 add_subdirectory(module)
+add_subdirectory(sys)
 
 if(BUILD_TEST)
     add_subdirectory(test)
