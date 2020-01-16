@@ -1,4 +1,11 @@
+#include <signal.h>
+#ifndef _WIN32
+#include <sys/time.h>
+#endif /* !_WIN32 */
+#include <stddef.h>
+
 #include "rtimer.h"
+#include "clock.h"
 
 #define DEBUG 0
 #if DEBUG
@@ -8,55 +15,39 @@
 #define PRINTF(...)
 #endif
 
-static struct rtimer *next_rtimer;
-
 /*---------------------------------------------------------------------------*/
-void
-rtimer_init(void)
+static void
+interrupt(int sig)
 {
-  rtimer_arch_init();
-}
-/*---------------------------------------------------------------------------*/
-int
-rtimer_set(struct rtimer *rtimer, rtimer_clock_t time,
-	   rtimer_clock_t duration,
-	   rtimer_callback_t func, void *ptr)
-{
-  int first = 0;
-
-  PRINTF("rtimer_set time %d\n", time);
-
-  if(next_rtimer == NULL) {
-    first = 1;
-  }
-
-  rtimer->func = func;
-  rtimer->ptr = ptr;
-
-  rtimer->time = time;
-  next_rtimer = rtimer;
-
-  if(first == 1) {
-    rtimer_arch_schedule(time);
-  }
-  return RTIMER_OK;
+  signal(sig, interrupt);
+  rtimer_run_next();
 }
 /*---------------------------------------------------------------------------*/
 void
-rtimer_run_next(void)
+rtimer_arch_init(void)
 {
-  struct rtimer *t;
-  if(next_rtimer == NULL) {
-    return;
-  }
-  t = next_rtimer;
-  next_rtimer = NULL;
-  t->func(t, t->ptr);
-  if(next_rtimer != NULL) {
-    rtimer_arch_schedule(next_rtimer->time);
-  }
-  return;
+#ifndef _WIN32
+  signal(SIGALRM, interrupt);
+#endif /* !_WIN32 */
 }
 /*---------------------------------------------------------------------------*/
+void
+rtimer_arch_schedule(rtimer_clock_t t)
+{
+#ifndef _WIN32
+  struct itimerval val;
+  rtimer_clock_t c;
 
-/** @}*/
+  c = t - clock_time();
+  
+  val.it_value.tv_sec = c / CLOCK_SECOND;
+  val.it_value.tv_usec = (c % CLOCK_SECOND) * CLOCK_SECOND;
+
+  PRINTF("rtimer_arch_schedule time %"PRIu32 " %"PRIu32 " in %ld.%ld seconds\n",
+         t, c, (long)val.it_value.tv_sec, (long)val.it_value.tv_usec);
+
+  val.it_interval.tv_sec = val.it_interval.tv_usec = 0;
+  setitimer(ITIMER_REAL, &val, NULL);
+#endif /* !_WIN32 */
+}
+/*---------------------------------------------------------------------------*/

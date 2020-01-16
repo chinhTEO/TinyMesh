@@ -27,5 +27,9 @@ SET(sources
 
 include_directories(.)
 
+if(PLATFORM_NATIVE)
+    include_directories(${CMAKE_SOURCE_DIR}/platform/native/)
+endif()
+
 add_library(${this} STATIC ${headers} ${sources})
 target_link_libraries(${this} tymeshplatform)

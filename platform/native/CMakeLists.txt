@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 
 SET(this tymeshplatform)
 
@@ -8,7 +8,7 @@ if(BUILD_TEST)
 endif()
 
 SET(headers
-
+    sys/rtimer-arch.h
 )
 
 SET(sources

@@ -8,6 +8,9 @@
         "message_fixed.h": "c",
         "stdio.h": "c",
         "process.h": "c",
-        "neighbour.h": "c"
+        "neighbour.h": "c",
+        "clock.h": "c",
+        "native-def.h": "c",
+        "platform_def.h": "c"
     }
 }

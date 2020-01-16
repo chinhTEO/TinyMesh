@@ -49,6 +49,7 @@ typedef uint64_t rtimer_clock_t;
 #define RTIMER_CLOCK_MAX           ((rtimer_clock_t)-1)
 #define RTIMER_CLOCK_LT(a, b)      (RTIMER_CLOCK_DIFF((a),(b)) < 0)
 
+#include "sys/rtimer-arch.h"
 
 /*
  * RTIMER_GUARD_TIME is the minimum amount of rtimer ticks between
