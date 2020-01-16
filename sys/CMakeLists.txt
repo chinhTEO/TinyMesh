@@ -16,12 +16,16 @@ SET(headers
     process.h
     pt-sem.h
     pt.h
+    clock.h
+    rtimer.h
 )
 
 SET(sources
     process.c
+    rtimer.c
 )
 
 include_directories(.)
 
 add_library(${this} STATIC ${headers} ${sources})
+target_link_libraries(${this} tymeshplatform)

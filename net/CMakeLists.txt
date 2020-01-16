@@ -24,7 +24,7 @@ SET(sources
 )
 
 include_directories(.)
-include_directories(../module)
+include_directories(${CMAKE_SOURCE_DIR}/module)
 include_directories("${CMAKE_SOURCE_DIR}/dev")
 
 add_library(${this} STATIC ${headers} ${sources})
