@@ -12,5 +12,6 @@
         "clock.h": "c",
         "native-def.h": "c",
         "platform_def.h": "c"
-    }
+    },
+    "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools"
 }

@@ -10,9 +10,6 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
   include_directories("${gtest_SOURCE_DIR}/include")
 endif()
 
-include_directories("${CMAKE_SOURCE_DIR}/dev")
-include_directories("${CMAKE_SOURCE_DIR}/net")
-
 enable_testing()
 
 SET(sourcesUtest

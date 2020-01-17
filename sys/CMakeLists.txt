@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 
 SET(this tymeshsys)
 
@@ -25,11 +25,7 @@ SET(sources
     rtimer.c
 )
 
-include_directories(.)
-
-if(PLATFORM_NATIVE)
-    include_directories(${CMAKE_SOURCE_DIR}/platform/native/)
-endif()
-
 add_library(${this} STATIC ${headers} ${sources})
 target_link_libraries(${this} tymeshplatform)
+
+target_include_directories(${this} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

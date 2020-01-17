@@ -16,7 +16,7 @@ SET(sources
     sys/rtimer-arch.c
 )
 
-include_directories(.)
-include_directories(${CMAKE_SOURCE_DIR}/sys)
-
 add_library(${this} STATIC ${headers} ${sources})
+target_link_libraries(${this} tymeshsys)
+
+target_include_directories(${this} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/sys")

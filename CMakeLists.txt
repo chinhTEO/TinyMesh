@@ -4,6 +4,10 @@ set(PROJECT_NAME tymesh)
 
 set(PLATFORM_NATIVE ON)
 
+if(PLATFORM_NATIVE)
+    add_definitions(-D_POSIX_C_SOURCE=200809L)
+endif()
+
 if(BUILD_TEST)
     set(BUILD_TOOL ON)
     set(CMAKE_BUILD_TYPE Debug)
