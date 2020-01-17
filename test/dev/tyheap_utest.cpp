@@ -735,89 +735,89 @@ TEST_F(tyheap_utest, tyheap_delete_alloc){
     EXPECT_EQ(block->status, END);
 }
 
-/**
- * @brief Construct a new test f object
- * we try to allocande aloct
- * 
- */
-TEST_F(tyheap_utest, tyheap_perfomance){
-    unsigned int maxArray = 20, allocNum = 0, freeNum = 0;
-    unsigned int maxAlocationSize = 150;
-    int indexFail = 0;
-    std::vector<unsigned char *>memArray;
-    unsigned int numberOfAction = 10000000;
+// /**
+//  * @brief Construct a new test f object
+//  * we try to allocande aloct
+//  * 
+//  */
+// TEST_F(tyheap_utest, tyheap_perfomance){
+//     unsigned int maxArray = 20, allocNum = 0, freeNum = 0;
+//     unsigned int maxAlocationSize = 150;
+//     int indexFail = 0;
+//     std::vector<unsigned char *>memArray;
+//     unsigned int numberOfAction = 10000000;
     
-    srand(time(0));
-    for(unsigned int i = 0; i < numberOfAction; i++){
-        int result = rand() % 30;
-        if(result >= 21){
-            unsigned int thisSize = rand() % maxAlocationSize;
-            if(thisSize == 0)
-                thisSize = 5;
-            unsigned char *mem = (unsigned char *)tyheap_alloc(thisSize);
-            allocNum++;
-            if(mem == (unsigned char *)NULL){
-                printf("required size : %d \n", thisSize);
-                break;
-            }
-            memArray.push_back(mem);
-        }else{
-            if(!memArray.empty()){
-                freeNum++;
-                unsigned int number = rand() % memArray.size();
-                tyheap_free(memArray[number]);
-                memArray.erase(memArray.begin() + number);
-            }
-        }
-        indexFail++;
-        //printf("i am at : %d \n", i);
-    }
-    printf("this fail at : %d (alloc : %d | free : %d | detla : %d )\n", indexFail, allocNum, freeNum, allocNum - freeNum);
-    //tyheap_printblock();
-    //tyheap_printmem(SIZE_OF_HEAP);
-    EXPECT_EQ(indexFail, numberOfAction);
-}
+//     srand(time(0));
+//     for(unsigned int i = 0; i < numberOfAction; i++){
+//         int result = rand() % 30;
+//         if(result >= 21){
+//             unsigned int thisSize = rand() % maxAlocationSize;
+//             if(thisSize == 0)
+//                 thisSize = 5;
+//             unsigned char *mem = (unsigned char *)tyheap_alloc(thisSize);
+//             allocNum++;
+//             if(mem == (unsigned char *)NULL){
+//                 printf("required size : %d \n", thisSize);
+//                 break;
+//             }
+//             memArray.push_back(mem);
+//         }else{
+//             if(!memArray.empty()){
+//                 freeNum++;
+//                 unsigned int number = rand() % memArray.size();
+//                 tyheap_free(memArray[number]);
+//                 memArray.erase(memArray.begin() + number);
+//             }
+//         }
+//         indexFail++;
+//         //printf("i am at : %d \n", i);
+//     }
+//     printf("this fail at : %d (alloc : %d | free : %d | detla : %d )\n", indexFail, allocNum, freeNum, allocNum - freeNum);
+//     //tyheap_printblock();
+//     //tyheap_printmem(SIZE_OF_HEAP);
+//     EXPECT_EQ(indexFail, numberOfAction);
+// }
 
 
-/**
- * @brief Construct a new test f object
- * we try to allocande aloct
- * 
- */
-TEST_F(tyheap_utest, tyheap_flash_perfomance){
-    unsigned int maxArray = 20, allocNum = 0, freeNum = 0;
-    unsigned int maxAlocationSize = 150;
-    int indexFail = 0;
-    std::vector<unsigned char *>memArray;
-    unsigned int numberOfAction = 10000000;
+// /**
+//  * @brief Construct a new test f object
+//  * we try to allocande aloct
+//  * 
+//  */
+// TEST_F(tyheap_utest, tyheap_flash_perfomance){
+//     unsigned int maxArray = 20, allocNum = 0, freeNum = 0;
+//     unsigned int maxAlocationSize = 150;
+//     int indexFail = 0;
+//     std::vector<unsigned char *>memArray;
+//     unsigned int numberOfAction = 10000000;
     
-    srand(time(0));
-    for(unsigned int i = 0; i < numberOfAction; i++){
-        int result = rand() % 30;
-        if(result >= 21){
-            unsigned int thisSize = rand() % maxAlocationSize;
-            if(thisSize == 0)
-                thisSize = 5;
-            unsigned char *mem = (unsigned char *)tyheap_flash_alloc(thisSize);
-            allocNum++;
-            if(mem == (unsigned char *)NULL){
-                printf("required size : %d \n", thisSize);
-                break;
-            }
-            memArray.push_back(mem);
-        }else{
-            if(!memArray.empty()){
-                freeNum++;
-                unsigned int number = rand() % memArray.size();
-                tyheap_free(memArray[number]);
-                memArray.erase(memArray.begin() + number);
-            }
-        }
-        indexFail++;
-        //printf("i am at : %d \n", i);
-    }
-    printf("this fail at : %d (alloc : %d | free : %d | detla : %d )\n", indexFail, allocNum, freeNum, allocNum - freeNum);
-    //tyheap_printblock();
-    //tyheap_printmem(SIZE_OF_HEAP);
-    EXPECT_EQ(indexFail, numberOfAction);
-}
+//     srand(time(0));
+//     for(unsigned int i = 0; i < numberOfAction; i++){
+//         int result = rand() % 30;
+//         if(result >= 21){
+//             unsigned int thisSize = rand() % maxAlocationSize;
+//             if(thisSize == 0)
+//                 thisSize = 5;
+//             unsigned char *mem = (unsigned char *)tyheap_flash_alloc(thisSize);
+//             allocNum++;
+//             if(mem == (unsigned char *)NULL){
+//                 printf("required size : %d \n", thisSize);
+//                 break;
+//             }
+//             memArray.push_back(mem);
+//         }else{
+//             if(!memArray.empty()){
+//                 freeNum++;
+//                 unsigned int number = rand() % memArray.size();
+//                 tyheap_free(memArray[number]);
+//                 memArray.erase(memArray.begin() + number);
+//             }
+//         }
+//         indexFail++;
+//         //printf("i am at : %d \n", i);
+//     }
+//     printf("this fail at : %d (alloc : %d | free : %d | detla : %d )\n", indexFail, allocNum, freeNum, allocNum - freeNum);
+//     //tyheap_printblock();
+//     //tyheap_printmem(SIZE_OF_HEAP);
+//     EXPECT_EQ(indexFail, numberOfAction);
+// }

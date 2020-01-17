@@ -66,3 +66,62 @@ void *queue_find(struct Queue *queue, bool (*conditionFunction)(void *element, u
     }
     return NULL;
 }
+
+void *queue_pop_element(struct Queue *queue, bool (*conditionFunction)(void *element, unsigned short pos, void *arg), void *arg){
+    struct Node *node = queue->head;
+    struct Node *passNode = queue->head;
+    unsigned short pos = 0;
+
+    if(queue->size != 0){
+        if(conditionFunction(node, pos, arg)){
+            queue->head = (struct Node *)node->next;
+            queue->size = queue->size - 1;
+            return node;            
+        }else{
+            passNode = node;
+            node = (struct Node *)node->next;
+            ++pos;
+
+            while(queue->size != pos){
+                if(conditionFunction(node, pos, arg)){
+                    if(node == queue->tail){
+                        queue->tail = passNode;
+                        queue->size = queue->size - 1;
+                        return node;     
+                    }else{
+                        passNode->next = node->next;
+                        queue->size = queue->size - 1;
+                        return node; 
+                    }
+                }else{
+                    passNode = node;
+                    node = (struct Node *)node->next;
+                    ++pos;
+                }
+            }
+        }
+    }
+    return NULL;
+}
+
+
+#if DEBUG
+	void printQueueAddressChain(struct Queue *queue){
+        struct Node *node = queue->head;
+        unsigned short pos = 0;
+        printf(" ---------- queue chain start ----------\n");
+        printf("head : %ld \n", (unsigned long)node);
+        if(queue->size != 0){
+            while(queue->size != pos){
+                printf(" %ld ->\n", (unsigned long)node);
+                if(node != queue->tail){
+                    node = (struct Node *)node->next;
+                }else{
+                    printf("tail : %ld \n", (unsigned long)node);
+                }
+                ++pos;
+            }
+        }
+        printf(" ---------- queue chain end -----------\n");
+    }
+#endif

@@ -79,7 +79,6 @@ static volatile unsigned char poll_requested;
 
 static void call_process(struct process *p, process_event_t ev, process_data_t data);
 
-#define DEBUG 0
 #if DEBUG
 #include <stdio.h>
 #define PRINTF(...) printf(__VA_ARGS__)

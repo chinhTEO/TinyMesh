@@ -10,6 +10,7 @@ endif()
 
 if(BUILD_TEST)
     set(BUILD_TOOL ON)
+    add_definitions(-DDEBUG=1)
     set(CMAKE_BUILD_TYPE Debug)
 endif()
 

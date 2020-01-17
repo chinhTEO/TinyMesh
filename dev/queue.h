@@ -29,7 +29,11 @@ enum STATUS queue_push(struct Queue *queue, void *element);
 unsigned short queue_size(struct Queue *queue);
 
 void *queue_find(struct Queue *queue, bool (*conditionFunction)(void *element, unsigned short pos, void *arg), void *arg);
-enum STATUS queue_remove(struct Queue *queue, bool (*conditionFunction)(void *element, unsigned short pos));
+void *queue_pop_element(struct Queue *queue, bool (*conditionFunction)(void *element, unsigned short pos, void *arg), void *arg);
+
+#if DEBUG
+	void printQueueAddressChain(struct Queue *queue);
+#endif
 
 #ifdef __cplusplus
 } // closing brace for extern "C"

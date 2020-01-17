@@ -11,7 +11,9 @@
         "neighbour.h": "c",
         "clock.h": "c",
         "native-def.h": "c",
-        "platform_def.h": "c"
+        "platform_def.h": "c",
+        "unordered_map": "c",
+        "unordered_set": "c"
     },
     "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools"
 }

@@ -7,8 +7,6 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
-#define DEBUG 1
-
 #ifdef UTEST
     //#define SIZE_OF_HEAP 100
     #define SIZE_OF_HEAP 2000
