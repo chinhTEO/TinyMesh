@@ -24,10 +24,12 @@ enum MESSAGE_FIXED {
 };
 
 struct Message_variable_define {
+    uint16_t headerRequirement;
     unsigned short (*recv_callback)(uint8_t *data, unsigned short len);
 };
 
 struct Message_fixed_define {
+    uint16_t headerRequirement;
     unsigned short length;
     unsigned short (*recv_callback)(uint8_t *data, unsigned short len);     
 };

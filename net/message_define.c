@@ -9,13 +9,13 @@
 
 const struct Message_variable_define message_variable_list[NUMBER_OF_MESSAGE_VARIABLE] = {
 #if UTEST
-    utest_variable_callback,
+    {3 , utest_variable_callback},
 #endif
-    abc_callback,
+    {0 , abc_callback},
 };
 
 const struct Message_fixed_define message_fixed_list[NUMBER_OF_MESSAGE_FIXED] = {
 #if UTEST
-    { utest_fixed_message_length , utest_fixed_callback},
+    {3, utest_fixed_message_length , utest_fixed_callback},
 #endif
 };

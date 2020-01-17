@@ -18,6 +18,7 @@ enum MESSAGE_LENGTH_TYPE{
 struct Message_out{
     struct Message_out *next;
     unsigned short length;
+    uint16_t headerRequirement;
     enum MESSAGE_PRIOITY priority;
     uint8_t *data;
 };

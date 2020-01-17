@@ -20,6 +20,7 @@ struct Message_out *message_variable_create(enum MESSAGE_VARIABLE type, uint8_t 
 
     memcpy(&packet_data[DATA_POS], data, length);
 
+    message_packet->headerRequirement = message_variable_list[type].headerRequirement;
     message_packet->length = length + SIZE_OF_VARIABLE_HEADER;
     message_packet->priority = priority;
     message_packet->data = packet_data;

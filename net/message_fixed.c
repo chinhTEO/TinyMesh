@@ -15,6 +15,7 @@ struct Message_out *message_fixed_create(enum MESSAGE_FIXED type, uint8_t *data,
     packet_data[0] = type << 1 | FIXED;
     memcpy(&packet_data[1], data, message_fixed_list[type].length);
 
+    message_packet->headerRequirement = message_fixed_list[type].headerRequirement;
     message_packet->data = packet_data;
     message_packet->length = message_fixed_list[type].length + SIZE_OF_FIXED_HEADER;
     message_packet->priority = priority;

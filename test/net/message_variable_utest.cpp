@@ -24,11 +24,12 @@ TEST_F(message_variable_utest, message_variable_create){
     struct Message_out *message_packet = (struct Message_out *)message_variable_create(MESSAGE_UTEST_VARIABLE, (uint8_t *)data, 6, HIGH_PRIORITY);
     EXPECT_EQ(message_packet->priority, HIGH_PRIORITY);
     EXPECT_EQ(message_packet->length, 8);
+    EXPECT_EQ(message_packet->headerRequirement, message_variable_list[MESSAGE_UTEST_VARIABLE].headerRequirement);
 
     uint8_t header = (uint8_t)(MESSAGE_UTEST_VARIABLE << 1 | VARIABLE);
 
     EXPECT_EQ(message_packet->data[0], header);
-    EXPECT_EQ(message_packet->data[1], 6);
+    EXPECT_EQ(message_packet->data[1], 6);   
 
     for(int i = 0; i < 6; i++){
         EXPECT_EQ(message_packet->data[i+2], data[i]);
