@@ -29,6 +29,8 @@ uint8_t *tymesh_framer_create(unsigned short *len){
     struct Message_out *message;
     uint8_t *outputFrame = tyheap_flash_alloc(LIMIT_SIZE_OF_OUTPUT_FRAME);
 
+    
+
     if(frame_header != NULL){
         memcpy(&outputFrame[size], frame_header->data, frame_header->length); 
         size = size + message->length;

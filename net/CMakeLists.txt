@@ -13,6 +13,7 @@ SET(headers
     message_fixed.h
     message_define.h
     tymesh_framer.h
+    frame_header.h
 )
 
 SET(sources
@@ -21,6 +22,7 @@ SET(sources
     message_define.c
     message.c
     tymesh_framer.c
+    frame_header.c
 )
 
 add_library(${this} STATIC ${headers} ${sources})

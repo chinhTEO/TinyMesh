@@ -13,7 +13,8 @@
         "native-def.h": "c",
         "platform_def.h": "c",
         "unordered_map": "c",
-        "unordered_set": "c"
+        "unordered_set": "c",
+        "frame_header.h": "c"
     },
     "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools"
 }

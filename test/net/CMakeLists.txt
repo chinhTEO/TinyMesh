@@ -17,6 +17,7 @@ SET(sourcesUtest
     message_utest.cpp
     message_variable_utest.cpp
     tymesh_framer_utest.cpp
+    frame_header.cpp
 )
 
 add_executable(${utest} ${sourcesUtest})
