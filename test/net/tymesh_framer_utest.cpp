@@ -47,22 +47,22 @@ TEST_F(tymesh_framer_utest, tymesh_framer_create) {
     tymesh_framer_add(message_packet_1);
     uint8_t *out_str = tymesh_framer_create(&len);
 
-    EXPECT_EQ(len, 15);
+    EXPECT_EQ(len, 17);
 
     uint8_t header = (uint8_t)(MESSAGE_UTEST_FIXED << 1 | FIXED);
     EXPECT_EQ(message_packet->data[0], header);
     for(int i = 0; i < message_fixed_list[MESSAGE_UTEST_FIXED].length; i++){
-        EXPECT_EQ(out_str[i+1], data[i]);
+        EXPECT_EQ(out_str[i+1+2], data[i]);
     }
 
     header = (uint8_t)(MESSAGE_UTEST_VARIABLE << 1 | VARIABLE);
 
-    EXPECT_EQ(out_str[7], header);
-    EXPECT_EQ(out_str[8], 6);
+    EXPECT_EQ(out_str[7 + 2], header);
+    EXPECT_EQ(out_str[8 + 2], 6);
 
     for(int i = 0; i < 6; i++){
-        EXPECT_EQ(out_str[i+7+2], data[i]);
+        EXPECT_EQ(out_str[i+7+2+2], data[i]);
     }
 
-    processMessageList(out_str, len);
+    tymesh_framer_process(out_str, 17);
 }

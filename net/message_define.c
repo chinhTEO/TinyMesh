@@ -9,7 +9,7 @@
 
 const struct Message_variable_define message_variable_list[NUMBER_OF_MESSAGE_VARIABLE] = {
 #if UTEST
-    {3 , utest_variable_callback},
+    {0 , utest_variable_callback},
 #endif
     {0 , abc_callback},
 };

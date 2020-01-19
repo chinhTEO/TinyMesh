@@ -17,10 +17,20 @@ enum HEADER_FIELD_LIST {
 struct HeaderField {
     unsigned short lenght;
     uint8_t *data;
+    uint8_t *recv_data;
 };
+
+extern uint8_t RECV_IPV6_UUID[8];
+extern uint8_t RECV_SHORT_UUID[2];
+extern uint8_t RECV_PAN_ID[2];
+extern uint8_t RECV_BATTERY_PERCENTAGE;
+extern uint8_t RECV_BARRIER_LEVEL;
+extern uint16_t RECV_FRAME_NUMBER;
 
 unsigned short lengthOfHeader(int16_t headerSignature);
 unsigned short createHeader(int16_t headerSignature, uint8_t *out);
+unsigned short proccessHeader(uint8_t *header);
+
 
 #ifdef __cplusplus
 } // closing brace for extern "C"

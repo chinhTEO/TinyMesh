@@ -12,6 +12,7 @@ extern "C" {
 void tymesh_framer_init();
 void tymesh_framer_add(struct Message_out *message);
 uint8_t *tymesh_framer_create(unsigned short *len);
+unsigned short tymesh_framer_process(uint8_t *data, unsigned short len);
 
 #if UTEST
 
