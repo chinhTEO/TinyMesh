@@ -17,11 +17,11 @@ SET(sourcesUtest
     message_utest.cpp
     message_variable_utest.cpp
     tymesh_framer_utest.cpp
-    frame_header.cpp
+    frame_header_utest.cpp
 )
 
 add_executable(${utest} ${sourcesUtest})
-target_link_libraries(${utest} ${this} gtest_main gmock_main tymeshdev tymeshnet)
+target_link_libraries(${utest} ${this} gtest_main gmock_main tymeshsys tymeshnet tymeshdev)
 
 add_test(NAME ${utest} 
         COMMAND ${utest})

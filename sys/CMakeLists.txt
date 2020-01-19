@@ -18,11 +18,13 @@ SET(headers
     pt.h
     clock.h
     rtimer.h
+    env_variable.h
 )
 
 SET(sources
     process.c
     rtimer.c
+    env_variable.c
 )
 
 add_library(${this} STATIC ${headers} ${sources})

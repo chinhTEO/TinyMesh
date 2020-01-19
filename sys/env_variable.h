@@ -10,7 +10,7 @@ extern uint8_t SHORT_UUID[2];
 extern uint8_t PAN_ID[2];
 extern uint8_t BATTERY_PERCENTAGE;
 extern uint8_t BARRIER_LEVEL;
-
+extern uint16_t FRAME_NUMBER;
 
 #ifdef __cplusplus
 } // closing brace for extern "C"

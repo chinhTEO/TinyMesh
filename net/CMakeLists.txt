@@ -26,6 +26,6 @@ SET(sources
 )
 
 add_library(${this} STATIC ${headers} ${sources})
-target_link_libraries(${this} tymeshdev tymeshmodule)
+target_link_libraries(${this} tymeshdev tymeshmodule tymeshsys)
 
 target_include_directories(${this} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
