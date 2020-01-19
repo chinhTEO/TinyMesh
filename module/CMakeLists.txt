@@ -12,6 +12,7 @@ SET(headers
     utest_variable.h
     abc.h
     neighbour.h
+    ibc.h
 )
 
 SET(sources
@@ -19,6 +20,7 @@ SET(sources
     utest_variable.c
     abc.c
     neighbour.c
+    ibc.c
 )
 
 add_library(${this} STATIC ${headers} ${sources})
