@@ -20,6 +20,7 @@ add_subdirectory(net)
 add_subdirectory(module)
 add_subdirectory(sys)
 add_subdirectory(platform)
+add_subdirectory(protocol)
 
 if(BUILD_TEST)
     add_subdirectory(test)

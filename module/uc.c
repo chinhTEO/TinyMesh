@@ -1,4 +1,4 @@
-#include "ibc.h"
+#include "uc.h"
 #include "frame_header.h"
 #include "env_variable.h"
 #include "message.h"
@@ -7,13 +7,19 @@
 #include "tymesh_framer.h"
 #include <string.h>
 #include <stdio.h>
+#include "tyheap.h"
 
-void ibc_send(uint8_t *data, unsigned len){
-    struct Message_out *message = message_variable_create(MESSAGE_IBC, data, len, HIGH_PRIORITY);
+#define IPV6_ADDRESS_SIZE 8
+
+void uc_send(IPV6_ADDR *address, uint8_t *data, unsigned len) {
+    uint8_t *thisData = tyheap_flash_alloc(IPV6_ADDRESS_SIZE + len);
+    memcpy(thisData, address, IPV6_ADDRESS_SIZE);
+    memcpy((uint8_t *)&thisData[IPV6_ADDRESS_SIZE], data, len);
+    struct Message_out *message = message_variable_create(MESSAGE_UC, thisData, len + IPV6_ADDRESS_SIZE, HIGH_PRIORITY);
     tymesh_framer_add(message);
 }
 
-unsigned short ibc_callback(uint8_t *data, unsigned short len){
+unsigned short uc_callback(uint8_t *data, unsigned short len){
     char buffer[50];
     memcpy(buffer, data, len);
     buffer[len] = '\0';

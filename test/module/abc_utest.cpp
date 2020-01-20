@@ -31,8 +31,6 @@ TEST_F(abc_utest, abc_send){
 
 TEST_F(abc_utest, abc_callback){
     unsigned short len;
-    memcpy(IPV6_UUID, "12345678", 8);
-    memset(RECV_IPV6_UUID, '9', 8);
 
     char hello_msg[] = "hello world";
     abc_send((uint8_t *)hello_msg, 12); 

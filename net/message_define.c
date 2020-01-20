@@ -3,6 +3,7 @@
 #include "frame_header.h"
 #include "abc.h"
 #include "ibc.h"
+#include "uc.h"
 
 #if UTEST
 #include "utest_fixed.h"
@@ -15,6 +16,7 @@ const struct Message_variable_define message_variable_list[NUMBER_OF_MESSAGE_VAR
 #endif
     {0 , abc_callback},
     {HEADER_SELF_ADDRESS_IPV6, ibc_callback},
+    {HEADER_SELF_ADDRESS_IPV6, uc_callback},
 };
 
 const struct Message_fixed_define message_fixed_list[NUMBER_OF_MESSAGE_FIXED] = {

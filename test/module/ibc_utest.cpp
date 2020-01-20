@@ -34,6 +34,10 @@ TEST_F(ibc_utest, ibc_callback){
     memcpy(IPV6_UUID, "12345678", 8);
     memset(RECV_IPV6_UUID, '9', 8);
 
+    for(int i = 0; i < 8; i++){
+        EXPECT_NE(IPV6_UUID[i], RECV_IPV6_UUID[i]);
+    }
+
     char hello_msg[] = "hello world";
     ibc_send((uint8_t *)hello_msg, 12); 
 

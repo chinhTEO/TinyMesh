@@ -6,7 +6,7 @@ extern "C" {
 #include <stdint.h>
 #include "message.h"
 
-#define NUMBER_OF_MESSAGE_VARIABLE 3
+#define NUMBER_OF_MESSAGE_VARIABLE 4
 #define NUMBER_OF_MESSAGE_FIXED 2
 
 enum MESSAGE_VARIABLE {
@@ -15,6 +15,7 @@ enum MESSAGE_VARIABLE {
 #endif
     MESSAGE_ABC,
     MESSAGE_IBC,
+    MESSAGE_UC,
 };
 
 enum MESSAGE_FIXED {

@@ -12,3 +12,5 @@ job-build:
     - make -j
     - ./test/dev/dev_utest
     - ./test/net/net_utest
+    - ./test/protocol/protocol_utest
+    - ./test/module/module_utest
