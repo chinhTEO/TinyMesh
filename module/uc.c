@@ -23,6 +23,6 @@ unsigned short uc_callback(uint8_t *data, unsigned short len){
     char buffer[50];
     memcpy(buffer, data, len);
     buffer[len] = '\0';
-    printf("recv from %x:%x:%x:%x:%x:%x:%x:%x : %s \n", RECV_IPV6_UUID[0],RECV_IPV6_UUID[1],RECV_IPV6_UUID[2],RECV_IPV6_UUID[3],
-                                                      RECV_IPV6_UUID[4],RECV_IPV6_UUID[5],RECV_IPV6_UUID[6],RECV_IPV6_UUID[7], buffer);
+    printf("recv from %x:%x:%x:%x:%x:%x:%x:%x : %s \n", RECV_IPV6_UUID.u8[0],RECV_IPV6_UUID.u8[1],RECV_IPV6_UUID.u8[2],RECV_IPV6_UUID.u8[3],
+                                                      RECV_IPV6_UUID.u8[4],RECV_IPV6_UUID.u8[5],RECV_IPV6_UUID.u8[6],RECV_IPV6_UUID.u8[7], buffer);
 }

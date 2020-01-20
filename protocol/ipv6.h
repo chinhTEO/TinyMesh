@@ -7,8 +7,8 @@ extern "C" {
 #include <string.h>
 
 typedef union IPV6_ADDR {
-    uint8_t  uint8_t[8];                      /* Initializer, must come first. */
-    uint16_t uint16_t[4];  
+    uint8_t  u8[8];                      /* Initializer, must come first. */
+    uint16_t u16[4];  
 } IPV6_ADDR;
 
 #define ipv6addr_cmp(addr1, addr2) (memcmp(addr1, addr2, sizeof(IPV6_ADDR)) == 0)

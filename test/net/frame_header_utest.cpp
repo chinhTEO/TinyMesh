@@ -23,7 +23,7 @@ TEST(framer_header_utest, createHeader){
     memcpy(&validationBuffer[10],    fakeShort, 2);
     memcpy(&validationBuffer[12],    (uint8_t *)&fakeFrameHeader, 2);
 
-    memcpy(IPV6_UUID,     fakeIPV6, 8);
+    memcpy(&IPV6_UUID,     fakeIPV6, 8);
     memcpy(SHORT_UUID,    fakeShort, 2);
     memcpy((uint8_t *)&FRAME_NUMBER,    (uint8_t *)&fakeFrameHeader, 2);
 

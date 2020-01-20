@@ -2,7 +2,7 @@
 #include "env_variable.h"
 #include "string.h"
 
-uint8_t RECV_IPV6_UUID[8];
+IPV6_ADDR RECV_IPV6_UUID;
 uint8_t RECV_SHORT_UUID[2];
 uint8_t RECV_PAN_ID[2];
 uint8_t RECV_BATTERY_PERCENTAGE;
@@ -10,7 +10,7 @@ uint8_t RECV_BARRIER_LEVEL;
 uint16_t RECV_FRAME_NUMBER;
 
 const struct HeaderField headerField[NUMBER_OF_HEADER_FIELD] = {
-    {8, IPV6_UUID, RECV_IPV6_UUID},                                   //SELF_ADDRESS_IPV6
+    {8, &IPV6_UUID, &RECV_IPV6_UUID},                                   //SELF_ADDRESS_IPV6
     {2, SHORT_UUID, RECV_SHORT_UUID},                                 //SELF_ADDRESS_SHORT
     {2, PAN_ID , RECV_PAN_ID},                                        //PAN_ID
     {2, (uint8_t *)&FRAME_NUMBER, (uint8_t *)&RECV_FRAME_NUMBER}      //FRAME_ID

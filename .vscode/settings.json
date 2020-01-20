@@ -16,7 +16,8 @@
         "unordered_set": "c",
         "frame_header.h": "c",
         "uc.h": "c",
-        "utest_variable.h": "c"
+        "utest_variable.h": "c",
+        "ipv6.h": "c"
     },
     "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools"
 }

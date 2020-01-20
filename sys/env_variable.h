@@ -4,8 +4,9 @@
 extern "C" {
 #endif
 #include <stdint.h>
+#include "ipv6.h"
 
-extern uint8_t IPV6_UUID[8];
+extern IPV6_ADDR IPV6_UUID;
 extern uint8_t SHORT_UUID[2];
 extern uint8_t PAN_ID[2];
 extern uint8_t BATTERY_PERCENTAGE;

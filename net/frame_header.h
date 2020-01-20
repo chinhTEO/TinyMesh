@@ -4,6 +4,7 @@
 extern "C" {
 #endif
 #include <stdint.h>
+#include "ipv6.h"
 
 #define NUMBER_OF_HEADER_FIELD 16
 
@@ -20,7 +21,7 @@ struct HeaderField {
     uint8_t *recv_data;
 };
 
-extern uint8_t RECV_IPV6_UUID[8];
+extern IPV6_ADDR RECV_IPV6_UUID;
 extern uint8_t RECV_SHORT_UUID[2];
 extern uint8_t RECV_PAN_ID[2];
 extern uint8_t RECV_BATTERY_PERCENTAGE;

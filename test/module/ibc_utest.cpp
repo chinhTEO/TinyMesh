@@ -31,11 +31,11 @@ TEST_F(ibc_utest, ibc_send){
 
 TEST_F(ibc_utest, ibc_callback){
     unsigned short len;
-    memcpy(IPV6_UUID, "12345678", 8);
-    memset(RECV_IPV6_UUID, '9', 8);
+    memcpy(&IPV6_UUID, "12345678", 8);
+    memset(&RECV_IPV6_UUID, '9', 8);
 
     for(int i = 0; i < 8; i++){
-        EXPECT_NE(IPV6_UUID[i], RECV_IPV6_UUID[i]);
+        EXPECT_NE(IPV6_UUID.u8[i], RECV_IPV6_UUID.u8[i]);
     }
 
     char hello_msg[] = "hello world";
@@ -46,6 +46,6 @@ TEST_F(ibc_utest, ibc_callback){
     tymesh_framer_process(frame, len);
 
     for(int i = 0; i < 8; i++){
-        EXPECT_EQ(IPV6_UUID[i], RECV_IPV6_UUID[i]);
+        EXPECT_EQ(IPV6_UUID.u8[i], RECV_IPV6_UUID.u8[i]);
     }
 }
