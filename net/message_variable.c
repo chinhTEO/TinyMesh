@@ -30,7 +30,7 @@ struct Message_out *message_variable_create(enum MESSAGE_VARIABLE type, uint8_t 
 
 unsigned short message_variable_proccess(uint8_t *data){
     uint8_t len = data[LENGH_INFO_POS];
-    unsigned short even = message_variable_list[data[TYPE_INFO_POS] >> 1].recv_callback(&data[TYPE_INFO_POS], len);
+    unsigned short even = message_variable_list[data[TYPE_INFO_POS] >> 1].recv_callback(&data[DATA_POS], len);
     // dosome thing noti for example
     return len + SIZE_OF_VARIABLE_HEADER; // 2 byte for header + len data byte = num of byte is processed
 }

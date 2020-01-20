@@ -30,7 +30,7 @@ uint8_t *tymesh_framer_create(unsigned short *len){
     struct Message_out *message;
     struct Queue messageList;
     uint16_t headerSignature = 0;
-    unsigned short headerLength = 0;
+    unsigned short headerLength = 2; // for no header package
     
     //uint8_t *outputFrame = tyheap_flash_alloc(LIMIT_SIZE_OF_OUTPUT_FRAME);
     queue_init(&messageList, 100);
@@ -60,6 +60,7 @@ uint8_t *tymesh_framer_create(unsigned short *len){
         }else{
             if( lengthOfHeader(headerSignature | message->headerRequirement) + message->length + size < LIMIT_SIZE_OF_OUTPUT_FRAME){
                 headerLength = lengthOfHeader(headerSignature | message->headerRequirement);
+                headerSignature = (headerSignature | message->headerRequirement);
                 // memcpy(&outputFrame[size], message->data, message->length);
                 queue_push(&messageList, message); 
                 queue_pop(&highPriorityMessageList);
@@ -88,6 +89,7 @@ uint8_t *tymesh_framer_create(unsigned short *len){
         }else{
             if( lengthOfHeader(headerSignature | message->headerRequirement) + message->length + size < LIMIT_SIZE_OF_OUTPUT_FRAME){
                 headerLength = lengthOfHeader(headerSignature | message->headerRequirement);
+                headerSignature = (headerSignature | message->headerRequirement);
                 // memcpy(&outputFrame[size], message->data, message->length);
                 queue_push(&messageList, message); 
                 queue_pop(&lowPriorityMessageList);

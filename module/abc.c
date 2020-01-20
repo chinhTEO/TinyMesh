@@ -14,5 +14,5 @@ unsigned short abc_callback(uint8_t *data, unsigned short len){
     char buffer[50];
     memcpy(buffer, data, len);
     buffer[len] = '\0';
-    printf("abc recv :%s\n", buffer);
+    printf("recv from abc: %s \n", buffer);
 }
