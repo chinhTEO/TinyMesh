@@ -17,7 +17,8 @@
         "frame_header.h": "c",
         "uc.h": "c",
         "utest_variable.h": "c",
-        "ipv6.h": "c"
+        "ipv6.h": "c",
+        "stdint.h": "c"
     },
     "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools"
 }

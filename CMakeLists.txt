@@ -11,6 +11,7 @@ endif()
 if(BUILD_TEST)
     set(BUILD_TOOL ON)
     add_definitions(-DDEBUG=1)
+    add_definitions(-DNBT_UTEST_SUPPORT=1)
     set(CMAKE_BUILD_TYPE Debug)
 endif()
 
