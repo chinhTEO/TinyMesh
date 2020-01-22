@@ -8,26 +8,14 @@ if(BUILD_TEST)
 endif()
 
 SET(headers
-    cc-gcc.h
-    cc.h
-    lc-addrlabels.h
-    lc-switch.h
-    lc.h
-    process.h
-    pt-sem.h
-    pt.h
-    clock.h
-    rtimer.h
     env_variable.h
 )
 
 SET(sources
-    process.c
-    rtimer.c
     env_variable.c
 )
 
 add_library(${this} STATIC ${headers} ${sources})
-target_link_libraries(${this} tymeshplatform tymeshprotocol)
+target_link_libraries(${this} tymeshprotocol protothread)
 
 target_include_directories(${this} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

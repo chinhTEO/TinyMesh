@@ -45,6 +45,10 @@ void NBT_END(){
     }
 }
 
+void *NBT_GET(char *UUID){
+    return queue_find(&nbt_snap_list, conditionFunction, (void *)UUID);
+}
+
 void nbt_add_snap(char *UUID, void *data, unsigned int len){
     struct nbt_snap *snap = malloc(sizeof(struct nbt_snap));
     snap->key_UUID = malloc(sizeof(char)*100);

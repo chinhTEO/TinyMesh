@@ -22,6 +22,7 @@ add_subdirectory(module)
 add_subdirectory(sys)
 add_subdirectory(platform)
 add_subdirectory(protocol)
+add_subdirectory(experiment)
 
 if(BUILD_TEST)
     add_subdirectory(test)

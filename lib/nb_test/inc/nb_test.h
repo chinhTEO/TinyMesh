@@ -15,6 +15,8 @@ extern "C" {
 
 void NBT_BEGIN();
 void NBT_END();
+void *NBT_GET(char *UUID);
+
 bool nbt_cmp(char *key_UUID, void *data);
 void nbt_add_snap(char *UUID, void *data, unsigned int len);
 
