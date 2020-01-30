@@ -9,10 +9,12 @@ endif()
 
 SET(headers
     env_variable.h
+    process.h
 )
 
 SET(sources
     env_variable.c
+    process.c
 )
 
 add_library(${this} STATIC ${headers} ${sources})
